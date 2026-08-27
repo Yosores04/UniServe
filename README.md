@@ -1,102 +1,119 @@
 # BukSU Courier
 
-BukSU Courier is a Vite + React demonstration system for campus deliveries, errands, printing, and student marketplace requests.
+BukSU Courier is a campus services platform for requesting food deliveries, printing services, errands, and marketplace orders. The application provides dedicated workspaces for customers, couriers, campus entrepreneurs, and administrators.
 
-## Requirements
+## Overview
 
-- Node.js 20 LTS or newer
-- npm (included with Node.js)
-- A modern browser such as Chrome, Edge, or Firefox
+The application includes the following user areas:
 
-## Run The System Locally
+- **Student Portal:** Submit, track, cancel, and reorder campus service requests.
+- **Courier Portal:** Manage availability, review requests, accept assignments, and update delivery progress.
+- **Entrepreneur Portal:** Review store orders, update preparation status, and monitor sales information.
+- **Admin Portal:** Monitor operations, filter active orders, and review applications.
 
-Open PowerShell or a terminal in the project folder and run:
+The current release is a frontend prototype intended for evaluation, presentation, and workflow review. The interface and application flows are implemented locally using React and TypeScript.
 
-```powershell
-npm install
-npm run dev
-```
+## Technology Stack
 
-Open the local address shown by Vite, usually:
+- React 19
+- TypeScript
+- Vite
+- Vitest
+- Lucide React
 
-```text
-http://localhost:5173/
-```
+## System Requirements
 
-The development server must remain open while using the system. Stop it with `Ctrl+C`.
+For local development or building the application, install the following:
+
+- Node.js 20 LTS or later
+- npm, included with Node.js
+- A modern web browser such as Google Chrome, Microsoft Edge, or Mozilla Firefox
+
+## Local Installation
+
+1. Install Node.js 20 LTS or a later LTS release from [nodejs.org](https://nodejs.org/).
+2. Open PowerShell or Command Prompt.
+3. Navigate to the application directory:
+
+  ```powershell
+  cd "path\to\BukSU Courier"
+  ```
+
+4. Install the project dependencies:
+
+  ```powershell
+  npm install
+  ```
+
+5. Start the local development server:
+
+  ```powershell
+  npm run dev
+  ```
+
+6. Open the local address displayed in the terminal. The default address is:
+
+  ```text
+  http://localhost:5173/
+  ```
+
+Keep the terminal window open while using the local application. Press `Ctrl+C` to stop the development server.
 
 ## Production Build
 
-To create an optimized version for hosting:
+To create an optimized build for deployment, run:
 
 ```powershell
 npm install
 npm run build
 ```
 
-The deployable files will be created in the `dist` folder. Preview the production build locally with:
+The generated files are placed in the `dist` directory.
+
+To preview the production build locally:
 
 ```powershell
 npm run preview
 ```
 
-## Client Laptop With No Node.js
+## Deployment For Client Use
 
-The client has two practical options.
+The client environment does not need Node.js when the application is deployed as a static website. Build the application on a development computer with Node.js, then upload the contents of the `dist` directory to a static hosting provider such as GitHub Pages, Netlify, or Vercel.
 
-### Option A: Install Node.js on the laptop
+The client can then access the application through the hosting URL using a web browser. The generated files should be served through HTTP or HTTPS rather than opened directly from the local file system, because Vite asset paths require a web server.
 
-1. Download the **Node.js LTS** installer from https://nodejs.org/.
-2. Install it using the default settings.
-3. Restart PowerShell or Command Prompt.
-4. Confirm the installation:
+## Authentication
 
-   ```powershell
-   node --version
-   npm --version
-   ```
+The current authentication interface is intended for workflow presentation and local evaluation. It includes:
 
-5. Copy the project folder to the laptop.
-6. Run `npm install`, then `npm run dev`.
-7. Open the local Vite address in the browser.
+- Email sign-in
+- Account registration
+- Role selection during registration
+- Guest access
+- A Google sign-in interface for presentation purposes
+- Sign-out from the application header
 
-### Option B: Host the built files without Node.js
+Authentication data is not connected to a server, database, or identity provider in this release. No real Google credentials should be entered. Before production use, authentication must be replaced with a secure identity service and server-side authorization.
 
-Build the project on a computer that has Node.js:
+## Application Data
 
-```powershell
-npm install
-npm run build
-```
+Orders, users, courier availability, store statuses, and activity updates are currently maintained in browser memory. Data is reset when the page is refreshed or the reset control is used.
 
-Upload the contents of `dist` to a static hosting provider such as GitHub Pages, Netlify, or Vercel. The client then opens the hosting URL and does not need Node.js installed.
+A production implementation will require:
 
-Do not open `dist/index.html` directly with a `file:///` URL. Vite asset paths are intended to be served over HTTP by a web server or static hosting provider.
-
-## Demo Authentication
-
-Authentication is currently for demonstration only. It does not use a backend, database, real password storage, or real Google OAuth.
-
-- Use **Continue as guest** for the fastest demo.
-- Use **Continue with Google Demo** to show the Google sign-in experience.
-- Use **Sign up** to select a demo role: student/customer, courier, or entrepreneur.
-- Use **Log out** in the header to return to the auth screen.
-
-Never use the demo authentication flow for real accounts or production credentials.
-
-## Available Demo Portals
-
-- **Student Portal:** create, track, cancel, and reorder delivery requests.
-- **Courier Portal:** change availability, filter jobs, accept requests, and advance delivery status.
-- **Entrepreneur Portal:** manage store order preparation statuses and view sales.
-- **Admin Portal:** monitor active orders, filter operations, and approve or reject applications.
+- A backend API
+- Persistent database storage
+- Secure authentication and password handling
+- Role-based authorization
+- Server-side order and payment validation
+- Production Google OAuth configuration, if Google sign-in is required
 
 ## Development Commands
 
 ```powershell
-npm run dev       # Start the Vite development server
+npm run dev       # Start the development server
 npm run build     # Type-check and create the production build
-npm run test      # Run the test suite
+npm run test      # Run the automated test suite
 npm run preview   # Preview the production build
 ```
 
@@ -105,12 +122,28 @@ npm run preview   # Preview the production build
 ```text
 src/
   App.tsx                 Application entry point and session state
-  components/             Shared UI, header, auth, cards, and map components
-  lib/                    Demo state, authentication helpers, and tests
-  portals/                Student, courier, entrepreneur, and admin views
-  styles.css              Shared responsive styling
+  components/             Shared interface, authentication, card, and map components
+  lib/                    Application state, authentication helpers, and tests
+  portals/                Student, courier, entrepreneur, and admin workspaces
+  styles.css              Responsive application styling
 ```
 
-## Important Note
+## Verification
 
-This repository is a frontend demo. Orders, authentication, users, and portal actions are stored only in browser memory and reset when the page is refreshed or the demo is reset. A production version would need a backend API, persistent database, secure authentication, authorization rules, and real Google OAuth configuration.
+Run the test suite before delivery or deployment:
+
+```powershell
+npm run test -- --run
+```
+
+Create a production build to verify TypeScript compilation and bundling:
+
+```powershell
+npm run build
+```
+
+## Repository
+
+The source code is hosted at:
+
+<https://github.com/Yosores04/UniServe>
