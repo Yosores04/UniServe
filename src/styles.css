@@ -645,6 +645,11 @@ textarea {
   font-weight: 900;
 }
 
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
 .primary-button {
   padding: 0 17px;
   background: var(--gold);
@@ -830,6 +835,44 @@ textarea {
   color: #6b7890;
   font-size: 0.78rem;
   font-weight: 850;
+}
+
+.availability-control {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 14px;
+  padding: 11px 12px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: #f8fafc;
+}
+
+.availability-control > div {
+  display: grid;
+  grid-template-columns: auto auto;
+  align-items: center;
+  gap: 2px 7px;
+}
+
+.availability-control small {
+  grid-column: 2;
+  color: var(--muted);
+  font-size: 0.7rem;
+}
+
+.status-dot {
+  width: 9px;
+  height: 9px;
+  grid-row: span 2;
+  border-radius: 50%;
+  background: #9aa6b6;
+}
+
+.status-dot.online {
+  background: #1c9b5f;
+  box-shadow: 0 0 0 3px rgba(28, 155, 95, 0.13);
 }
 
 .verified-label {

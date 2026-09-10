@@ -6,7 +6,7 @@ export type OrderStatus = "Pending" | "Accepted" | "Picked up" | "On the way" | 
 
 export type StoreOrderStatus = "New" | "Preparing" | "Ready for pickup" | "Completed";
 
-export type CourierAvailability = "Available" | "Busy" | "Offline";
+export type CourierAvailability = "Online" | "Offline";
 
 export type PaymentMethod = "COD" | "E-wallet";
 

@@ -61,7 +61,7 @@ const couriers = [
     id: "courier-1",
     name: "Mara D.",
     avatar: "MD",
-    availability: "Available" as const,
+    availability: "Online" as const,
     rating: 4.95,
     deliveriesToday: 8,
     earningsToday: 420,
@@ -71,7 +71,7 @@ const couriers = [
     id: "courier-2",
     name: "Ken A.",
     avatar: "KA",
-    availability: "Available" as const,
+    availability: "Online" as const,
     rating: 4.82,
     deliveriesToday: 5,
     earningsToday: 265,
@@ -81,7 +81,7 @@ const couriers = [
     id: "courier-3",
     name: "Lia S.",
     avatar: "LS",
-    availability: "Busy" as const,
+    availability: "Online" as const,
     rating: 4.89,
     deliveriesToday: 7,
     earningsToday: 360,
@@ -136,7 +136,7 @@ const orders: Order[] = [
 export function calculateStats(state: Omit<DemoState, "stats">): AdminStats {
   const activeOrders = state.orders.filter((order) => order.status !== "Delivered").length;
   const availableOrders = state.orders.filter((order) => order.status === "Pending").length;
-  const activeCouriers = state.couriers.filter((courier) => courier.availability === "Available").length;
+  const activeCouriers = state.couriers.filter((courier) => courier.availability === "Online").length;
   const totalRevenue = state.orders.reduce((sum, order) => sum + order.fee, 0);
   const averageRating =
     state.stores.reduce((sum, store) => sum + store.rating, 0) / Math.max(1, state.stores.length);
@@ -161,7 +161,7 @@ export function createDemoState(): DemoState {
     orders,
     activity: [
       "Admin verified Student Market Stall",
-      "Mara D. switched to Available",
+      "Mara D. switched to Online",
       "Print Hub received a printing request"
     ],
     complaints: [
@@ -226,7 +226,7 @@ export function cancelOrder(state: DemoState, orderId: string): DemoState {
 
 export function acceptOrder(state: DemoState, orderId: string, courierId: string): DemoState {
   const courier = state.couriers.find((candidate) => candidate.id === courierId);
-  if (!courier || courier.availability !== "Available") {
+  if (!courier || courier.availability !== "Online") {
     return state;
   }
 
@@ -238,7 +238,7 @@ export function acceptOrder(state: DemoState, orderId: string, courierId: string
         : order
     ),
     couriers: state.couriers.map((candidate) =>
-      candidate.id === courierId ? { ...candidate, availability: "Busy" as const } : candidate
+      candidate.id === courierId ? { ...candidate, availability: "Online" as const } : candidate
     ),
     activity: [`${courier.name} accepted ${orderId}`, ...state.activity]
   };
@@ -274,7 +274,7 @@ export function advanceOrderStatus(state: DemoState, orderId: string): DemoState
       courier.id === completedCourierId
         ? {
             ...courier,
-            availability: "Available" as const,
+            availability: "Online" as const,
             deliveriesToday: courier.deliveriesToday + 1,
             earningsToday: courier.earningsToday + 30
           }

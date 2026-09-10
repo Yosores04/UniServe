@@ -45,8 +45,8 @@ describe("BukSU Courier demo state", () => {
 
     expect(activeOrder?.courierId).toBe("courier-1");
     expect(activeOrder?.status).toBe("Accepted");
-    expect(activeCourier?.availability).toBe("Busy");
-    expect(assigned.stats.activeCouriers).toBe(state.stats.activeCouriers - 1);
+    expect(activeCourier?.availability).toBe("Online");
+    expect(assigned.stats.activeCouriers).toBe(state.stats.activeCouriers);
 
     const pickedUp = advanceOrderStatus(assigned, "order-1001");
     expect(pickedUp.orders.find((order) => order.id === "order-1001")?.status).toBe("Picked up");
@@ -57,7 +57,7 @@ describe("BukSU Courier demo state", () => {
     );
 
     expect(delivered.orders.find((order) => order.id === "order-1001")?.status).toBe("Delivered");
-    expect(delivered.couriers.find((courier) => courier.id === "courier-1")?.availability).toBe("Available");
+    expect(delivered.couriers.find((courier) => courier.id === "courier-1")?.availability).toBe("Online");
     expect(delivered.couriers.find((courier) => courier.id === "courier-1")?.earningsToday).toBeGreaterThan(
       activeCourier?.earningsToday ?? 0
     );
@@ -72,6 +72,8 @@ describe("BukSU Courier demo state", () => {
     const offline = setCourierAvailability(preparing, "courier-2", "Offline");
     expect(offline.couriers.find((courier) => courier.id === "courier-2")?.availability).toBe("Offline");
     expect(offline.stats.activeCouriers).toBe(preparing.stats.activeCouriers - 1);
+    expect(setCourierAvailability(offline, "courier-2", "Online").couriers.find((courier) => courier.id === "courier-2")?.availability).toBe("Online");
+    expect(acceptOrder(offline, "order-1001", "courier-2")).toBe(offline);
   });
 
   it("cancels only pending customer orders", () => {

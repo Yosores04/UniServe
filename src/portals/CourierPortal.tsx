@@ -1,4 +1,10 @@
-import { Bike, CheckCircle2, Clock3, MessageCircle, PackageCheck } from "lucide-react";
+import {
+  Bike,
+  CheckCircle2,
+  Clock3,
+  MessageCircle,
+  PackageCheck,
+} from "lucide-react";
 import { useState, type Dispatch, type SetStateAction } from "react";
 import {
   acceptOrder,
@@ -17,7 +23,7 @@ import {
   PortalLayout,
   money,
 } from "../components/DemoKit";
-import type { CourierAvailability, DemoState, Order } from "../types";
+import type { DemoState, Order } from "../types";
 
 export function CourierPortal({
   state,
@@ -30,7 +36,9 @@ export function CourierPortal({
     "All" | "Food" | "Printing" | "Errand"
   >("All");
   const courier = state.couriers[0];
-  const completedOrders = state.orders.filter((order) => order.courierId === courier.id && order.status === "Delivered");
+  const completedOrders = state.orders.filter(
+    (order) => order.courierId === courier.id && order.status === "Delivered",
+  );
   const availableOrders = state.orders.filter(
     (order) =>
       order.status === "Pending" &&
@@ -75,29 +83,20 @@ export function CourierPortal({
                 <span className="verified-label">Verified courier</span>
               </div>
             </div>
-            <div className="availability-row">
-              {(["Available", "Busy", "Offline"] as CourierAvailability[]).map(
-                (availability) => (
-                  <button
-                    className={
-                      courier.availability === availability ? "selected" : ""
-                    }
-                    key={availability}
-                    type="button"
-                    onClick={() =>
-                      setState((current) =>
-                        setCourierAvailability(
-                          current,
-                          courier.id,
-                          availability,
-                        ),
-                      )
-                    }
-                  >
-                    {availability}
-                  </button>
-                ),
-              )}
+            <div className="availability-control">
+              <div>
+                <span className={courier.availability === "Online" ? "status-dot online" : "status-dot"} />
+                <strong>{courier.availability}</strong>
+                <small>{courier.availability === "Online" ? "Available for service and delivery" : "Not currently accepting requests"}</small>
+              </div>
+              <button
+                className={courier.availability === "Online" ? "selected chip-button" : "primary-button"}
+                type="button"
+                aria-pressed={courier.availability === "Online"}
+                onClick={() => setState((current) => setCourierAvailability(current, courier.id, courier.availability === "Online" ? "Offline" : "Online"))}
+              >
+                {courier.availability === "Online" ? "Go offline" : "Go online"}
+              </button>
             </div>
             <div className="earnings-tile">
               <span>Courier earnings</span>
@@ -106,7 +105,9 @@ export function CourierPortal({
             <div className="history-list">
               <div className="section-label">Earnings history</div>
               <span>{completedOrders.length} completed deliveries</span>
-              <strong>{money(completedOrders.length * 30)} earned from completed jobs</strong>
+              <strong>
+                {money(completedOrders.length * 30)} earned from completed jobs
+              </strong>
             </div>
           </Panel>
 
@@ -154,6 +155,8 @@ export function CourierPortal({
                   <button
                     className="secondary-button"
                     type="button"
+                    disabled={courier.availability === "Offline"}
+                    title={courier.availability === "Offline" ? "Go online to accept service requests" : "Accept this request"}
                     onClick={() =>
                       setState((current) =>
                         acceptOrder(current, order.id, courier.id),
@@ -186,7 +189,9 @@ function ActiveDelivery({
 
   function sendMessage() {
     if (!message.trim()) return;
-    setState((current) => addOrderMessage(current, order.id, "Courier", message));
+    setState((current) =>
+      addOrderMessage(current, order.id, "Courier", message),
+    );
     setMessage("");
   }
 
@@ -194,9 +199,27 @@ function ActiveDelivery({
     <>
       <OrderCard order={order} />
       <div className="chat-box">
-        <div className="section-label"><MessageCircle size={14} /> Customer / store chat</div>
-        <div className="chat-messages">{(order.chat ?? []).slice(-3).map((item, index) => <p key={`${item.createdAt}-${index}`}><strong>{item.sender}</strong>{item.message}</p>)}</div>
-        <div className="chat-compose"><input value={message} onChange={(event) => setMessage(event.target.value)} placeholder="Send an update" /><button className="chip-button" type="button" onClick={sendMessage}>Send</button></div>
+        <div className="section-label">
+          <MessageCircle size={14} /> Customer / store chat
+        </div>
+        <div className="chat-messages">
+          {(order.chat ?? []).slice(-3).map((item, index) => (
+            <p key={`${item.createdAt}-${index}`}>
+              <strong>{item.sender}</strong>
+              {item.message}
+            </p>
+          ))}
+        </div>
+        <div className="chat-compose">
+          <input
+            value={message}
+            onChange={(event) => setMessage(event.target.value)}
+            placeholder="Send an update"
+          />
+          <button className="chip-button" type="button" onClick={sendMessage}>
+            Send
+          </button>
+        </div>
       </div>
       <button
         className="primary-button full"
