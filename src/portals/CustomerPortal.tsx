@@ -2,12 +2,13 @@ import {
   CheckCircle2,
   Clock3,
   Coffee,
+  MessageCircle,
   PackageCheck,
   Printer,
   Store as StoreIcon,
 } from "lucide-react";
-import type { Dispatch, SetStateAction } from "react";
-import { cancelOrder, placeOrder } from "../lib/demoState";
+import { useState, type Dispatch, type SetStateAction } from "react";
+import { addOrderMessage, cancelOrder, placeOrder, rateOrder, setPaymentMethod } from "../lib/demoState";
 import {
   CampusMap,
   ActivityFeed,
@@ -19,7 +20,7 @@ import {
   StoreTile,
   Timeline,
 } from "../components/DemoKit";
-import type { DemoState, Order, ServiceType } from "../types";
+import type { DemoState, Order, PaymentMethod, ServiceType } from "../types";
 
 type CustomerPortalProps = {
   state: DemoState;
@@ -39,28 +40,45 @@ type CustomerPortalProps = {
 export function CustomerPortal(props: CustomerPortalProps) {
   const campusNames = props.state.campusPoints.map((point) => point.name);
   const latestOrder = props.state.orders[0];
+  const [paymentMethod, setPayment] = useState<PaymentMethod>("COD");
+  const [historyFilter, setHistoryFilter] = useState<"All" | "Active" | "Completed">("All");
+  const [message, setMessage] = useState("");
+  const [requestError, setRequestError] = useState("");
   const customerOrders = props.state.orders.filter(
     (order) =>
       order.customerName === "Demo Customer" || order.id === "order-1001",
   );
+  const visibleOrders = customerOrders.filter((order) => historyFilter === "All" || (historyFilter === "Active" ? order.status !== "Delivered" : order.status === "Delivered"));
 
   function submitDemoOrder() {
+    if (props.pickupPoint === props.dropoffPoint) {
+      setRequestError("Choose different pickup and drop-off locations.");
+      return;
+    }
+    setRequestError("");
     const defaultItems: Record<ServiceType, string[]> = {
       Food: ["Chicken pastel", "Iced coffee"],
       Printing: ["Printed research paper"],
       Errand: ["Campus errand request"],
     };
 
-    props.setState((current) =>
-      placeOrder(current, {
+    props.setState((current) => {
+      const placed = placeOrder(current, {
         serviceType: props.serviceType,
         storeId: props.storeId,
         items: defaultItems[props.serviceType],
         pickupPoint: props.pickupPoint,
         dropoffPoint: props.dropoffPoint,
         customerNote: props.note,
-      }),
-    );
+      });
+      return setPaymentMethod(placed, placed.orders[0].id, paymentMethod);
+    });
+  }
+
+  function sendMessage() {
+    if (!message.trim()) return;
+    props.setState((current) => addOrderMessage(current, latestOrder.id, "Customer", message));
+    setMessage("");
   }
 
   function selectStore(storeId: string) {
@@ -155,11 +173,16 @@ export function CustomerPortal(props: CustomerPortalProps) {
             </div>
             <div className="checkout-bar">
               <div>
-                <strong>Cash on Delivery</strong>
+                <strong>{paymentMethod === "COD" ? "Cash on Delivery" : "UniServe E-wallet"}</strong>
                 <span>
                   Estimated service fee:{" "}
                   {props.serviceType === "Errand" ? "PHP 35" : "PHP 25"}
                 </span>
+              </div>
+              <div className="payment-picker">
+                {(["COD", "E-wallet"] as PaymentMethod[]).map((method) => (
+                  <button className={paymentMethod === method ? "selected chip-button" : "chip-button"} type="button" key={method} onClick={() => setPayment(method)}>{method}</button>
+                ))}
               </div>
               <button
                 className="primary-button"
@@ -170,6 +193,7 @@ export function CustomerPortal(props: CustomerPortalProps) {
                 Place order
               </button>
             </div>
+            {requestError && <p className="form-error" role="alert">{requestError}</p>}
           </Panel>
 
           <Panel className="span-5">
@@ -180,9 +204,15 @@ export function CustomerPortal(props: CustomerPortalProps) {
             />
             <OrderCard order={latestOrder} />
             <Timeline status={latestOrder.status} />
+            <div className="chat-box">
+              <div className="section-label"><MessageCircle size={14} /> Courier chat</div>
+              <div className="chat-messages">{(latestOrder.chat ?? []).slice(-3).map((item, index) => <p key={`${item.createdAt}-${index}`}><strong>{item.sender}</strong>{item.message}</p>)}</div>
+              <div className="chat-compose"><input value={message} onChange={(event) => setMessage(event.target.value)} placeholder="Write a message" /><button className="chip-button" type="button" onClick={sendMessage}>Send</button></div>
+            </div>
             <div className="order-history">
               <div className="section-label">Recent requests</div>
-              {customerOrders.slice(0, 4).map((order) => (
+              <div className="filter-row">{(["All", "Active", "Completed"] as const).map((filter) => <button className={historyFilter === filter ? "selected chip-button" : "chip-button"} type="button" key={filter} onClick={() => setHistoryFilter(filter)}>{filter}</button>)}</div>
+              {visibleOrders.slice(0, 4).map((order) => (
                 <div className="history-row" key={order.id}>
                   <span>
                     <strong>{order.id}</strong>
@@ -209,6 +239,7 @@ export function CustomerPortal(props: CustomerPortalProps) {
                         Cancel
                       </button>
                     )}
+                    {order.status === "Delivered" && <div className="rating-actions">{[1, 2, 3, 4, 5].map((rating) => <button className={order.rating === rating ? "selected chip-button" : "chip-button"} type="button" key={rating} onClick={() => props.setState((current) => rateOrder(current, order.id, rating))}>{rating}</button>)}</div>}
                   </div>
                 </div>
               ))}

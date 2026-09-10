@@ -1,7 +1,8 @@
-import { Bike, CheckCircle2, Clock3, PackageCheck } from "lucide-react";
+import { Bike, CheckCircle2, Clock3, MessageCircle, PackageCheck } from "lucide-react";
 import { useState, type Dispatch, type SetStateAction } from "react";
 import {
   acceptOrder,
+  addOrderMessage,
   advanceOrderStatus,
   setCourierAvailability,
 } from "../lib/demoState";
@@ -29,6 +30,7 @@ export function CourierPortal({
     "All" | "Food" | "Printing" | "Errand"
   >("All");
   const courier = state.couriers[0];
+  const completedOrders = state.orders.filter((order) => order.courierId === courier.id && order.status === "Delivered");
   const availableOrders = state.orders.filter(
     (order) =>
       order.status === "Pending" &&
@@ -70,6 +72,7 @@ export function CourierPortal({
                 <h3>{courier.name}</h3>
                 <p>{courier.currentPoint}</p>
                 <span>{courier.rating} rating</span>
+                <span className="verified-label">Verified courier</span>
               </div>
             </div>
             <div className="availability-row">
@@ -99,6 +102,11 @@ export function CourierPortal({
             <div className="earnings-tile">
               <span>Courier earnings</span>
               <strong>{money(courier.earningsToday)}</strong>
+            </div>
+            <div className="history-list">
+              <div className="section-label">Earnings history</div>
+              <span>{completedOrders.length} completed deliveries</span>
+              <strong>{money(completedOrders.length * 30)} earned from completed jobs</strong>
             </div>
           </Panel>
 
@@ -174,9 +182,22 @@ function ActiveDelivery({
   order: Order;
   setState: Dispatch<SetStateAction<DemoState>>;
 }) {
+  const [message, setMessage] = useState("");
+
+  function sendMessage() {
+    if (!message.trim()) return;
+    setState((current) => addOrderMessage(current, order.id, "Courier", message));
+    setMessage("");
+  }
+
   return (
     <>
       <OrderCard order={order} />
+      <div className="chat-box">
+        <div className="section-label"><MessageCircle size={14} /> Customer / store chat</div>
+        <div className="chat-messages">{(order.chat ?? []).slice(-3).map((item, index) => <p key={`${item.createdAt}-${index}`}><strong>{item.sender}</strong>{item.message}</p>)}</div>
+        <div className="chat-compose"><input value={message} onChange={(event) => setMessage(event.target.value)} placeholder="Send an update" /><button className="chip-button" type="button" onClick={sendMessage}>Send</button></div>
+      </div>
       <button
         className="primary-button full"
         type="button"

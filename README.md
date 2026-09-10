@@ -1,6 +1,6 @@
-# BukSU Courier
+# UniServe
 
-BukSU Courier is a campus services platform for requesting food deliveries, printing services, errands, and marketplace orders. The application provides dedicated workspaces for customers, couriers, campus entrepreneurs, and administrators.
+UniServe is a campus services platform for requesting food deliveries, printing services, errands, and marketplace orders. The application provides dedicated workspaces for customers, couriers, campus entrepreneurs, and administrators.
 
 ## Overview
 
@@ -36,7 +36,7 @@ For local development or building the application, install the following:
 3. Navigate to the application directory:
 
   ```powershell
-  cd "path\to\BukSU Courier"
+  cd "path\to\UniServe"
   ```
 
 4. Install the project dependencies:

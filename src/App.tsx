@@ -67,7 +67,7 @@ function App() {
       {role === "store" && (
         <EntrepreneurPortal state={state} setState={setState} />
       )}
-      {role === "admin" && <AdminPortal state={state} setRole={setRole} />}
+      {role === "admin" && <AdminPortal state={state} setRole={setRole} setState={setState} />}
     </main>
   );
 }

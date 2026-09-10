@@ -110,7 +110,8 @@ describe("BukSU Courier demo state", () => {
   it("adds chat messages to an existing order only", () => {
     const state = createDemoState();
     const next = addOrderMessage(state, "order-1001", "Customer", "Please call when you arrive.");
-    expect(next.orders[0].chat?.at(-1)?.message).toBe("Please call when you arrive.");
+    const messages = next.orders[0].chat ?? [];
+    expect(messages[messages.length - 1]?.message).toBe("Please call when you arrive.");
     expect(addOrderMessage(state, "missing", "Customer", "Hello")).toBe(state);
   });
 });

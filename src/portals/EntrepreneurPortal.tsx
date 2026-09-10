@@ -1,6 +1,7 @@
 import { LayoutDashboard, PackageCheck, Store as StoreIcon } from "lucide-react";
 import type { Dispatch, SetStateAction } from "react";
-import { setStoreOrderStatus } from "../lib/demoState";
+import { acceptStoreOrder, setStoreOpen, setStoreOrderStatus } from "../lib/demoState";
+import { useState } from "react";
 import {
   ActivityFeed,
   AdminTile,
@@ -22,8 +23,10 @@ export function EntrepreneurPortal({
   state: DemoState;
   setState: Dispatch<SetStateAction<DemoState>>;
 }) {
+  const [orderFilter, setOrderFilter] = useState<"All" | "New" | "Active" | "Completed">("All");
+  const [newItem, setNewItem] = useState("");
   const selectedStore = state.stores[0];
-  const storeOrders = state.orders.filter((order) => order.storeId === selectedStore.id);
+  const storeOrders = state.orders.filter((order) => order.storeId === selectedStore.id && (orderFilter === "All" || (orderFilter === "New" ? order.storeStatus === "New" : orderFilter === "Completed" ? order.storeStatus === "Completed" : order.storeStatus !== "Completed")));
   const mapOrder = storeOrders[0] ?? state.orders[0];
 
   return (
@@ -52,21 +55,28 @@ export function EntrepreneurPortal({
                 <span>{selectedStore.rating} rating</span>
                 <span>{selectedStore.status}</span>
               </div>
+              <span className="store-hours">Open {selectedStore.operatingHours}</span>
             </div>
             <div className="product-stack">
               {selectedStore.featuredItems.map((item) => (
                 <span key={item}>{item}</span>
               ))}
             </div>
+            <div className="store-controls">
+              <button className="chip-button" type="button" onClick={() => setState((current) => setStoreOpen(current, selectedStore.id, selectedStore.status === "Closed"))}>{selectedStore.status === "Open" ? "Close store" : "Open store"}</button>
+              <div className="chat-compose"><input value={newItem} onChange={(event) => setNewItem(event.target.value)} placeholder="Add featured item" /><button className="chip-button" type="button" onClick={() => { if (!newItem.trim()) return; setState((current) => ({ ...current, stores: current.stores.map((store) => store.id === selectedStore.id ? { ...store, featuredItems: [...store.featuredItems, newItem.trim()] } : store) })); setNewItem(""); }}>Add</button></div>
+            </div>
           </Panel>
 
           <Panel className="span-7">
             <PanelHeader icon={PackageCheck} eyebrow="Order preparation" title="Counter queue" />
+            <div className="filter-row">{(["All", "New", "Active", "Completed"] as const).map((filter) => <button className={orderFilter === filter ? "selected chip-button" : "chip-button"} type="button" key={filter} onClick={() => setOrderFilter(filter)}>{filter}</button>)}</div>
             <div className="order-list">
               {storeOrders.map((order) => (
                 <article className="queue-card" key={order.id}>
                   <OrderCard order={order} compact />
                   <div className="status-actions">
+                    {order.storeStatus === "New" && <button className="secondary-button" type="button" onClick={() => setState((current) => acceptStoreOrder(current, order.id))}>Accept order</button>}
                     {(["Preparing", "Ready for pickup", "Completed"] as StoreOrderStatus[]).map((status) => (
                       <button
                         className={order.storeStatus === status ? "selected chip-button" : "chip-button"}
