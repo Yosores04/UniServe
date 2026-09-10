@@ -35,7 +35,9 @@ export function AdminPortal({
   const [orderFilter, setOrderFilter] = useState<
     "All" | "Pending" | "In progress"
   >("All");
-  const [resourceTab, setResourceTab] = useState<"Users" | "Couriers" | "Stores">("Users");
+  const [resourceTab, setResourceTab] = useState<
+    "Users" | "Couriers" | "Stores"
+  >("Users");
   const [applications, setApplications] = useState([
     { label: "Courier applicant", name: "Arvin C.", status: "Interview" },
     {
@@ -174,35 +176,115 @@ export function AdminPortal({
           </Panel>
 
           <Panel className="span-7">
-            <PanelHeader icon={MessageCircle} eyebrow="Service desk" title="Complaints and reports" />
+            <PanelHeader
+              icon={MessageCircle}
+              eyebrow="Service desk"
+              title="Complaints and reports"
+            />
             <div className="order-list">
               {state.complaints.map((complaint) => (
                 <div className="application-row" key={complaint.id}>
                   <strong>{complaint.subject}</strong>
                   <em>{complaint.status}</em>
                   <span>{complaint.detail}</span>
-                  {complaint.status === "Open" && <button className="chip-button" type="button" onClick={() => setState((current) => resolveComplaint(current, complaint.id))}>Resolve</button>}
+                  {complaint.status === "Open" && (
+                    <button
+                      className="chip-button"
+                      type="button"
+                      onClick={() =>
+                        setState((current) =>
+                          resolveComplaint(current, complaint.id),
+                        )
+                      }
+                    >
+                      Resolve
+                    </button>
+                  )}
                 </div>
               ))}
             </div>
           </Panel>
 
           <Panel className="span-5">
-            <PanelHeader icon={ShieldCheck} eyebrow="Directory" title="Users and resources" />
-            <div className="filter-row">{(["Users", "Couriers", "Stores"] as const).map((tab) => <button className={resourceTab === tab ? "selected chip-button" : "chip-button"} type="button" key={tab} onClick={() => setResourceTab(tab)}>{tab}</button>)}</div>
+            <PanelHeader
+              icon={ShieldCheck}
+              eyebrow="Directory"
+              title="Users and resources"
+            />
+            <div className="filter-row">
+              {(["Users", "Couriers", "Stores"] as const).map((tab) => (
+                <button
+                  className={
+                    resourceTab === tab ? "selected chip-button" : "chip-button"
+                  }
+                  type="button"
+                  key={tab}
+                  onClick={() => setResourceTab(tab)}
+                >
+                  {tab}
+                </button>
+              ))}
+            </div>
             <div className="resource-list">
-              {resourceTab === "Users" && <><strong>Student and faculty accounts</strong><span>Customer access is active for the current workspace.</span></>}
-              {resourceTab === "Couriers" && state.couriers.map((courier) => <span key={courier.id}><strong>{courier.name}</strong> · {courier.availability} · {courier.rating} rating</span>)}
-              {resourceTab === "Stores" && state.stores.map((store) => <span key={store.id}><strong>{store.name}</strong> · {store.status} · {store.operatingHours}</span>)}
+              {resourceTab === "Users" && (
+                <>
+                  <strong>Student and faculty accounts</strong>
+                  <span>
+                    Customer access is active for the current workspace.
+                  </span>
+                </>
+              )}
+              {resourceTab === "Couriers" &&
+                state.couriers.map((courier) => (
+                  <span key={courier.id}>
+                    <strong>{courier.name}</strong> · {courier.availability} ·{" "}
+                    {courier.rating} rating
+                  </span>
+                ))}
+              {resourceTab === "Stores" &&
+                state.stores.map((store) => (
+                  <span key={store.id}>
+                    <strong>{store.name}</strong> · {store.status} ·{" "}
+                    {store.operatingHours}
+                  </span>
+                ))}
             </div>
           </Panel>
 
           <Panel className="span-12">
-            <PanelHeader icon={CreditCard} eyebrow="Analytics" title="Service overview" />
+            <PanelHeader
+              icon={CreditCard}
+              eyebrow="Analytics"
+              title="Service overview"
+            />
             <div className="admin-grid analytics-grid">
-              {(["Food", "Printing", "Errand"] as const).map((service) => <AdminTile key={service} icon={PackageCheck} label={`${service} requests`} value={state.orders.filter((order) => order.serviceType === service).length} />)}
-              <AdminTile icon={CreditCard} label="Average order value" value={money(Math.round(state.orders.reduce((sum, order) => sum + order.total, 0) / Math.max(1, state.orders.length)))} />
-              <AdminTile icon={Star} label="Rated deliveries" value={state.orders.filter((order) => order.rating).length} />
+              {(["Food", "Printing", "Errand"] as const).map((service) => (
+                <AdminTile
+                  key={service}
+                  icon={PackageCheck}
+                  label={`${service} requests`}
+                  value={
+                    state.orders.filter(
+                      (order) => order.serviceType === service,
+                    ).length
+                  }
+                />
+              ))}
+              <AdminTile
+                icon={CreditCard}
+                label="Average order value"
+                value={money(
+                  Math.round(
+                    state.orders.reduce((sum, order) => sum + order.total, 0) /
+                      Math.max(1, state.orders.length),
+                  ),
+                )}
+              />
+              <AdminTile
+                icon={Star}
+                label="Rated deliveries"
+                value={state.orders.filter((order) => order.rating).length}
+              />
             </div>
           </Panel>
         </div>

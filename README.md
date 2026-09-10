@@ -35,27 +35,27 @@ For local development or building the application, install the following:
 2. Open PowerShell or Command Prompt.
 3. Navigate to the application directory:
 
-  ```powershell
-  cd "path\to\UniServe"
-  ```
+```powershell
+cd "path\to\UniServe"
+```
 
 4. Install the project dependencies:
 
-  ```powershell
-  npm install
-  ```
+```powershell
+npm install
+```
 
 5. Start the local development server:
 
-  ```powershell
-  npm run dev
-  ```
+```powershell
+npm run dev
+```
 
 6. Open the local address displayed in the terminal. The default address is:
 
-  ```text
-  http://localhost:5173/
-  ```
+```text
+http://localhost:5173/
+```
 
 Keep the terminal window open while using the local application. Press `Ctrl+C` to stop the development server.
 

@@ -13,6 +13,7 @@
 ### Task 1: Rename the product and shared visual identity
 
 **Files:**
+
 - Modify: `src/components/DemoKit.tsx`
 - Modify: `src/components/AuthScreen.tsx`
 - Modify: `index.html`
@@ -51,6 +52,7 @@ git commit -m "Rename product to UniServe"
 ### Task 2: Extend shared in-memory workflow state
 
 **Files:**
+
 - Modify: `src/types.ts`
 - Modify: `src/lib/demoState.ts`
 - Modify: `src/lib/demoState.test.ts`
@@ -60,10 +62,16 @@ git commit -m "Rename product to UniServe"
 Add tests for:
 
 ```typescript
-expect(setPaymentMethod(state, "order-1001", "E-wallet").orders[0].paymentMethod).toBe("E-wallet");
+expect(
+  setPaymentMethod(state, "order-1001", "E-wallet").orders[0].paymentMethod,
+).toBe("E-wallet");
 expect(rateOrder(deliveredState, "order-1001", 5).orders[0].rating).toBe(5);
-expect(setStoreOpen(state, "canteen-express", false).stores[0].status).toBe("Closed");
-expect(resolveComplaint(state, "complaint-1").complaints[0].status).toBe("Resolved");
+expect(setStoreOpen(state, "canteen-express", false).stores[0].status).toBe(
+  "Closed",
+);
+expect(resolveComplaint(state, "complaint-1").complaints[0].status).toBe(
+  "Resolved",
+);
 ```
 
 The tests must also verify invalid status transitions return the original state.
@@ -87,12 +95,12 @@ Extend `PaymentMethod` to include `E-wallet`, add optional `rating` and `chat` f
 Add guarded helpers:
 
 ```typescript
-setPaymentMethod(state, orderId, paymentMethod)
-rateOrder(state, orderId, rating)
-addOrderMessage(state, orderId, sender, message)
-setStoreOpen(state, storeId, isOpen)
-acceptStoreOrder(state, orderId)
-resolveComplaint(state, complaintId)
+setPaymentMethod(state, orderId, paymentMethod);
+rateOrder(state, orderId, rating);
+addOrderMessage(state, orderId, sender, message);
+setStoreOpen(state, storeId, isOpen);
+acceptStoreOrder(state, orderId);
+resolveComplaint(state, complaintId);
 ```
 
 Each helper returns the original state for unknown IDs or invalid status conditions and recalculates stats when order/store state changes.
@@ -117,6 +125,7 @@ git commit -m "Add shared UniServe workflow state"
 ### Task 3: Complete customer workflow
 
 **Files:**
+
 - Modify: `src/portals/CustomerPortal.tsx`
 - Modify: `src/components/DemoKit.tsx`
 - Modify: `src/styles.css`
@@ -154,6 +163,7 @@ git commit -m "Expand customer service workflow"
 ### Task 4: Complete courier and entrepreneur workflows
 
 **Files:**
+
 - Modify: `src/portals/CourierPortal.tsx`
 - Modify: `src/portals/EntrepreneurPortal.tsx`
 - Modify: `src/components/DemoKit.tsx`
@@ -192,6 +202,7 @@ git commit -m "Expand courier and entrepreneur workflows"
 ### Task 5: Complete admin workflow and final validation
 
 **Files:**
+
 - Modify: `src/portals/AdminPortal.tsx`
 - Modify: `src/components/DemoKit.tsx`
 - Modify: `src/styles.css`

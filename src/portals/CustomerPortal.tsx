@@ -8,7 +8,13 @@ import {
   Store as StoreIcon,
 } from "lucide-react";
 import { useState, type Dispatch, type SetStateAction } from "react";
-import { addOrderMessage, cancelOrder, placeOrder, rateOrder, setPaymentMethod } from "../lib/demoState";
+import {
+  addOrderMessage,
+  cancelOrder,
+  placeOrder,
+  rateOrder,
+  setPaymentMethod,
+} from "../lib/demoState";
 import {
   CampusMap,
   ActivityFeed,
@@ -41,14 +47,22 @@ export function CustomerPortal(props: CustomerPortalProps) {
   const campusNames = props.state.campusPoints.map((point) => point.name);
   const latestOrder = props.state.orders[0];
   const [paymentMethod, setPayment] = useState<PaymentMethod>("COD");
-  const [historyFilter, setHistoryFilter] = useState<"All" | "Active" | "Completed">("All");
+  const [historyFilter, setHistoryFilter] = useState<
+    "All" | "Active" | "Completed"
+  >("All");
   const [message, setMessage] = useState("");
   const [requestError, setRequestError] = useState("");
   const customerOrders = props.state.orders.filter(
     (order) =>
       order.customerName === "Demo Customer" || order.id === "order-1001",
   );
-  const visibleOrders = customerOrders.filter((order) => historyFilter === "All" || (historyFilter === "Active" ? order.status !== "Delivered" : order.status === "Delivered"));
+  const visibleOrders = customerOrders.filter(
+    (order) =>
+      historyFilter === "All" ||
+      (historyFilter === "Active"
+        ? order.status !== "Delivered"
+        : order.status === "Delivered"),
+  );
 
   function submitDemoOrder() {
     if (props.pickupPoint === props.dropoffPoint) {
@@ -77,7 +91,9 @@ export function CustomerPortal(props: CustomerPortalProps) {
 
   function sendMessage() {
     if (!message.trim()) return;
-    props.setState((current) => addOrderMessage(current, latestOrder.id, "Customer", message));
+    props.setState((current) =>
+      addOrderMessage(current, latestOrder.id, "Customer", message),
+    );
     setMessage("");
   }
 
@@ -173,7 +189,11 @@ export function CustomerPortal(props: CustomerPortalProps) {
             </div>
             <div className="checkout-bar">
               <div>
-                <strong>{paymentMethod === "COD" ? "Cash on Delivery" : "UniServe E-wallet"}</strong>
+                <strong>
+                  {paymentMethod === "COD"
+                    ? "Cash on Delivery"
+                    : "UniServe E-wallet"}
+                </strong>
                 <span>
                   Estimated service fee:{" "}
                   {props.serviceType === "Errand" ? "PHP 35" : "PHP 25"}
@@ -181,7 +201,18 @@ export function CustomerPortal(props: CustomerPortalProps) {
               </div>
               <div className="payment-picker">
                 {(["COD", "E-wallet"] as PaymentMethod[]).map((method) => (
-                  <button className={paymentMethod === method ? "selected chip-button" : "chip-button"} type="button" key={method} onClick={() => setPayment(method)}>{method}</button>
+                  <button
+                    className={
+                      paymentMethod === method
+                        ? "selected chip-button"
+                        : "chip-button"
+                    }
+                    type="button"
+                    key={method}
+                    onClick={() => setPayment(method)}
+                  >
+                    {method}
+                  </button>
                 ))}
               </div>
               <button
@@ -193,7 +224,11 @@ export function CustomerPortal(props: CustomerPortalProps) {
                 Place order
               </button>
             </div>
-            {requestError && <p className="form-error" role="alert">{requestError}</p>}
+            {requestError && (
+              <p className="form-error" role="alert">
+                {requestError}
+              </p>
+            )}
           </Panel>
 
           <Panel className="span-5">
@@ -205,13 +240,50 @@ export function CustomerPortal(props: CustomerPortalProps) {
             <OrderCard order={latestOrder} />
             <Timeline status={latestOrder.status} />
             <div className="chat-box">
-              <div className="section-label"><MessageCircle size={14} /> Courier chat</div>
-              <div className="chat-messages">{(latestOrder.chat ?? []).slice(-3).map((item, index) => <p key={`${item.createdAt}-${index}`}><strong>{item.sender}</strong>{item.message}</p>)}</div>
-              <div className="chat-compose"><input value={message} onChange={(event) => setMessage(event.target.value)} placeholder="Write a message" /><button className="chip-button" type="button" onClick={sendMessage}>Send</button></div>
+              <div className="section-label">
+                <MessageCircle size={14} /> Courier chat
+              </div>
+              <div className="chat-messages">
+                {(latestOrder.chat ?? []).slice(-3).map((item, index) => (
+                  <p key={`${item.createdAt}-${index}`}>
+                    <strong>{item.sender}</strong>
+                    {item.message}
+                  </p>
+                ))}
+              </div>
+              <div className="chat-compose">
+                <input
+                  value={message}
+                  onChange={(event) => setMessage(event.target.value)}
+                  placeholder="Write a message"
+                />
+                <button
+                  className="chip-button"
+                  type="button"
+                  onClick={sendMessage}
+                >
+                  Send
+                </button>
+              </div>
             </div>
             <div className="order-history">
               <div className="section-label">Recent requests</div>
-              <div className="filter-row">{(["All", "Active", "Completed"] as const).map((filter) => <button className={historyFilter === filter ? "selected chip-button" : "chip-button"} type="button" key={filter} onClick={() => setHistoryFilter(filter)}>{filter}</button>)}</div>
+              <div className="filter-row">
+                {(["All", "Active", "Completed"] as const).map((filter) => (
+                  <button
+                    className={
+                      historyFilter === filter
+                        ? "selected chip-button"
+                        : "chip-button"
+                    }
+                    type="button"
+                    key={filter}
+                    onClick={() => setHistoryFilter(filter)}
+                  >
+                    {filter}
+                  </button>
+                ))}
+              </div>
               {visibleOrders.slice(0, 4).map((order) => (
                 <div className="history-row" key={order.id}>
                   <span>
@@ -239,7 +311,28 @@ export function CustomerPortal(props: CustomerPortalProps) {
                         Cancel
                       </button>
                     )}
-                    {order.status === "Delivered" && <div className="rating-actions">{[1, 2, 3, 4, 5].map((rating) => <button className={order.rating === rating ? "selected chip-button" : "chip-button"} type="button" key={rating} onClick={() => props.setState((current) => rateOrder(current, order.id, rating))}>{rating}</button>)}</div>}
+                    {order.status === "Delivered" && (
+                      <div className="rating-actions">
+                        {[1, 2, 3, 4, 5].map((rating) => (
+                          <button
+                            className={
+                              order.rating === rating
+                                ? "selected chip-button"
+                                : "chip-button"
+                            }
+                            type="button"
+                            key={rating}
+                            onClick={() =>
+                              props.setState((current) =>
+                                rateOrder(current, order.id, rating),
+                              )
+                            }
+                          >
+                            {rating}
+                          </button>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 </div>
               ))}
