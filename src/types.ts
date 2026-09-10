@@ -8,6 +8,21 @@ export type StoreOrderStatus = "New" | "Preparing" | "Ready for pickup" | "Compl
 
 export type CourierAvailability = "Available" | "Busy" | "Offline";
 
+export type PaymentMethod = "COD" | "E-wallet";
+
+export type ChatMessage = {
+  sender: string;
+  message: string;
+  createdAt: string;
+};
+
+export type Complaint = {
+  id: string;
+  subject: string;
+  detail: string;
+  status: "Open" | "Resolved";
+};
+
 export type CampusPoint = {
   id: string;
   name: string;
@@ -24,6 +39,7 @@ export type Store = {
   rating: number;
   salesToday: number;
   status: "Open" | "Closed";
+  operatingHours: string;
   featuredItems: string[];
 };
 
@@ -54,9 +70,11 @@ export type Order = {
   total: number;
   fee: number;
   etaMinutes: number;
-  paymentMethod: "COD";
+  paymentMethod: PaymentMethod;
   customerNote: string;
   createdAt: string;
+  rating?: number;
+  chat?: ChatMessage[];
 };
 
 export type AdminStats = {
@@ -77,6 +95,7 @@ export type DemoState = {
   orders: Order[];
   stats: AdminStats;
   activity: string[];
+  complaints: Complaint[];
 };
 
 export type NewOrderInput = {

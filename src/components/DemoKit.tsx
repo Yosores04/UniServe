@@ -54,15 +54,15 @@ export function UniversityHeader({
     <header className="university-header">
       <div className="brand-strip">
         <div className="buksu-mark" aria-hidden="true">
-          <span>B</span>
+          <span>U</span>
           <i />
         </div>
         <div>
-          <strong>BukSU Courier</strong>
+          <strong>UniServe</strong>
           <span>Campus delivery, errands, and marketplace services</span>
         </div>
       </div>
-      <nav className="buksu-nav" aria-label="BukSU Courier portals">
+      <nav className="buksu-nav" aria-label="UniServe portals">
         {portalConfigs.map((portal) => {
           const Icon = portalIcons[portal.role];
           return (

@@ -4,8 +4,14 @@ import {
   advanceOrderStatus,
   cancelOrder,
   createDemoState,
+  acceptStoreOrder,
+  addOrderMessage,
   placeOrder,
+  rateOrder,
+  resolveComplaint,
   setCourierAvailability,
+  setPaymentMethod,
+  setStoreOpen,
   setStoreOrderStatus
 } from "./demoState";
 
@@ -75,5 +81,36 @@ describe("BukSU Courier demo state", () => {
     expect(next.orders.some((order) => order.id === "order-1001")).toBe(false);
     expect(next.stats.totalOrders).toBe(state.stats.totalOrders - 1);
     expect(cancelOrder(state, "order-1002")).toBe(state);
+  });
+
+  it("updates payment method and allows ratings only after delivery", () => {
+    const state = createDemoState();
+    const paid = setPaymentMethod(state, "order-1001", "E-wallet");
+    expect(paid.orders.find((order) => order.id === "order-1001")?.paymentMethod).toBe("E-wallet");
+    expect(rateOrder(state, "order-1001", 5)).toBe(state);
+
+    const delivered = advanceOrderStatus(
+      advanceOrderStatus(
+        advanceOrderStatus(advanceOrderStatus(acceptOrder(state, "order-1001", "courier-1"), "order-1001"), "order-1001"),
+        "order-1001"
+      ),
+      "order-1001"
+    );
+    expect(rateOrder(delivered, "order-1001", 5).orders.find((order) => order.id === "order-1001")?.rating).toBe(5);
+  });
+
+  it("updates store availability, accepts new store orders, and resolves complaints", () => {
+    const state = createDemoState();
+    expect(setStoreOpen(state, "canteen-express", false).stores[0].status).toBe("Closed");
+    expect(acceptStoreOrder(state, "order-1002").orders.find((order) => order.id === "order-1002")?.storeStatus).toBe("Preparing");
+    expect(resolveComplaint(state, "complaint-1").complaints.find((complaint) => complaint.id === "complaint-1")?.status).toBe("Resolved");
+    expect(resolveComplaint(state, "missing")).toBe(state);
+  });
+
+  it("adds chat messages to an existing order only", () => {
+    const state = createDemoState();
+    const next = addOrderMessage(state, "order-1001", "Customer", "Please call when you arrive.");
+    expect(next.orders[0].chat?.at(-1)?.message).toBe("Please call when you arrive.");
+    expect(addOrderMessage(state, "missing", "Customer", "Hello")).toBe(state);
   });
 });

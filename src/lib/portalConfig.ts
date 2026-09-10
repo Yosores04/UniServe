@@ -44,7 +44,7 @@ export const portalConfigs: PortalConfig[] = [
     role: "admin",
     label: "Admin Portal",
     path: "/admin",
-    audience: "BukSU management",
+    audience: "University management",
     title: "Monitor deliveries, users, couriers, stores, and fees",
     subtitle: "A command dashboard for approvals, service quality, financials, and active orders.",
     primaryAction: "Open operations"

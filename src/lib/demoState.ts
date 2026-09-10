@@ -29,6 +29,7 @@ const stores = [
     rating: 4.8,
     salesToday: 6840,
     status: "Open" as const,
+    operatingHours: "7:00 AM - 6:00 PM",
     featuredItems: ["Chicken pastel", "Iced coffee", "Banana cue"]
   },
   {
@@ -39,6 +40,7 @@ const stores = [
     rating: 4.7,
     salesToday: 3280,
     status: "Open" as const,
+    operatingHours: "8:00 AM - 5:00 PM",
     featuredItems: ["Research paper", "Thesis draft", "ID photocopy"]
   },
   {
@@ -49,6 +51,7 @@ const stores = [
     rating: 4.9,
     salesToday: 5120,
     status: "Open" as const,
+    operatingHours: "9:00 AM - 4:00 PM",
     featuredItems: ["Cookies", "School supplies", "Packed lunch"]
   }
 ];
@@ -104,7 +107,8 @@ const orders: Order[] = [
     etaMinutes: 12,
     paymentMethod: "COD",
     customerNote: "Meet near the COT lobby.",
-    createdAt: "10:16 AM"
+    createdAt: "10:16 AM",
+    chat: [{ sender: "Courier", message: "I am heading to your drop-off point now.", createdAt: "10:20 AM" }]
   },
   {
     id: "order-1002",
@@ -124,7 +128,8 @@ const orders: Order[] = [
     etaMinutes: 18,
     paymentMethod: "COD",
     customerNote: "Please keep pages in order.",
-    createdAt: "10:22 AM"
+    createdAt: "10:22 AM",
+    chat: []
   }
 ];
 
@@ -158,6 +163,10 @@ export function createDemoState(): DemoState {
       "Admin verified Student Market Stall",
       "Mara D. switched to Available",
       "Print Hub received a printing request"
+    ],
+    complaints: [
+      { id: "complaint-1", subject: "Late delivery", detail: "Order order-1002 arrived after the estimated time.", status: "Open" as const },
+      { id: "complaint-2", subject: "Missing item", detail: "Customer reported one item missing from the order.", status: "Open" as const }
     ]
   };
 
@@ -306,4 +315,42 @@ export function setStoreOrderStatus(
   };
 
   return { ...next, stats: calculateStats(next) };
+}
+
+export function setPaymentMethod(state: DemoState, orderId: string, paymentMethod: Order["paymentMethod"]): DemoState {
+  if (!state.orders.some((order) => order.id === orderId)) return state;
+  const next = { ...state, orders: state.orders.map((order) => order.id === orderId ? { ...order, paymentMethod } : order) };
+  return { ...next, stats: calculateStats(next) };
+}
+
+export function rateOrder(state: DemoState, orderId: string, rating: number): DemoState {
+  const order = state.orders.find((candidate) => candidate.id === orderId);
+  if (!order || order.status !== "Delivered" || rating < 1 || rating > 5) return state;
+  const next = { ...state, orders: state.orders.map((candidate) => candidate.id === orderId ? { ...candidate, rating } : candidate), activity: [`Customer rated ${orderId} ${rating}/5`, ...state.activity] };
+  return { ...next, stats: calculateStats(next) };
+}
+
+export function addOrderMessage(state: DemoState, orderId: string, sender: string, message: string): DemoState {
+  const order = state.orders.find((candidate) => candidate.id === orderId);
+  if (!order || !message.trim()) return state;
+  const next = { ...state, orders: state.orders.map((candidate) => candidate.id === orderId ? { ...candidate, chat: [...(candidate.chat ?? []), { sender, message: message.trim(), createdAt: "Just now" }] } : candidate) };
+  return { ...next, stats: calculateStats(next) };
+}
+
+export function setStoreOpen(state: DemoState, storeId: string, isOpen: boolean): DemoState {
+  if (!state.stores.some((store) => store.id === storeId)) return state;
+  const next = { ...state, stores: state.stores.map((store) => store.id === storeId ? { ...store, status: isOpen ? "Open" as const : "Closed" as const } : store), activity: [`Store ${storeId} is now ${isOpen ? "open" : "closed"}`, ...state.activity] };
+  return { ...next, stats: calculateStats(next) };
+}
+
+export function acceptStoreOrder(state: DemoState, orderId: string): DemoState {
+  const order = state.orders.find((candidate) => candidate.id === orderId);
+  if (!order || order.storeStatus !== "New") return state;
+  const next = { ...state, orders: state.orders.map((candidate) => candidate.id === orderId ? { ...candidate, storeStatus: "Preparing" as const } : candidate), activity: [`Store accepted ${orderId}`, ...state.activity] };
+  return { ...next, stats: calculateStats(next) };
+}
+
+export function resolveComplaint(state: DemoState, complaintId: string): DemoState {
+  if (!state.complaints.some((complaint) => complaint.id === complaintId)) return state;
+  return { ...state, complaints: state.complaints.map((complaint) => complaint.id === complaintId ? { ...complaint, status: "Resolved" as const } : complaint) };
 }

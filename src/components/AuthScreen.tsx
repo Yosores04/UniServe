@@ -42,10 +42,10 @@ export function AuthScreen({
     <main className="auth-shell">
       <section className="auth-card">
         <div className="auth-mark" aria-hidden="true">
-          <span>B</span>
+          <span>U</span>
           <i />
         </div>
-        <p className="auth-kicker">BukSU Courier</p>
+        <p className="auth-kicker">UniServe</p>
         <h1>{mode === "login" ? "Welcome back" : "Create your account"}</h1>
         <p className="auth-intro">
           {mode === "login"
@@ -105,7 +105,7 @@ export function AuthScreen({
           </label>
           {mode === "signup" && (
             <label>
-              Use BukSU Courier as
+              Use UniServe as
               <select
                 value={role}
                 onChange={(event) => setRole(event.target.value as Role)}
@@ -153,7 +153,7 @@ export function AuthScreen({
           Continue as guest
         </button>
         <p className="auth-note">
-          Create your account here and get started with BukSU Courier.
+          Create your account here and get started with UniServe.
         </p>
       </section>
     </main>
