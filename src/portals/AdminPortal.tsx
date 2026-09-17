@@ -21,15 +21,13 @@ import {
   PortalLayout,
   money,
 } from "../components/DemoKit";
-import type { DemoState, Role } from "../types";
+import type { DemoState } from "../types";
 
 export function AdminPortal({
   state,
-  setRole,
   setState,
 }: {
   state: DemoState;
-  setRole: (role: Role) => void;
   setState: Dispatch<SetStateAction<DemoState>>;
 }) {
   const [orderFilter, setOrderFilter] = useState<
@@ -92,19 +90,16 @@ export function AdminPortal({
                 icon={Bike}
                 label="Active couriers"
                 value={state.stats.activeCouriers}
-                onOpen={() => setRole("courier")}
               />
               <AdminTile
                 icon={PackageCheck}
                 label="Active orders"
                 value={state.stats.activeOrders}
-                onOpen={() => setRole("customer")}
               />
               <AdminTile
                 icon={StoreIcon}
                 label="Stores"
                 value={state.stats.registeredStores}
-                onOpen={() => setRole("store")}
               />
               <AdminTile
                 icon={CreditCard}

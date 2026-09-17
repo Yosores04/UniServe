@@ -85,15 +85,37 @@ export function CourierPortal({
             </div>
             <div className="availability-control">
               <div>
-                <span className={courier.availability === "Online" ? "status-dot online" : "status-dot"} />
+                <span
+                  className={
+                    courier.availability === "Online"
+                      ? "status-dot online"
+                      : "status-dot"
+                  }
+                />
                 <strong>{courier.availability}</strong>
-                <small>{courier.availability === "Online" ? "Available for service and delivery" : "Not currently accepting requests"}</small>
+                <small>
+                  {courier.availability === "Online"
+                    ? "Available for service and delivery"
+                    : "Not currently accepting requests"}
+                </small>
               </div>
               <button
-                className={courier.availability === "Online" ? "selected chip-button" : "primary-button"}
+                className={
+                  courier.availability === "Online"
+                    ? "selected chip-button"
+                    : "primary-button"
+                }
                 type="button"
                 aria-pressed={courier.availability === "Online"}
-                onClick={() => setState((current) => setCourierAvailability(current, courier.id, courier.availability === "Online" ? "Offline" : "Online"))}
+                onClick={() =>
+                  setState((current) =>
+                    setCourierAvailability(
+                      current,
+                      courier.id,
+                      courier.availability === "Online" ? "Offline" : "Online",
+                    ),
+                  )
+                }
               >
                 {courier.availability === "Online" ? "Go offline" : "Go online"}
               </button>
@@ -156,7 +178,11 @@ export function CourierPortal({
                     className="secondary-button"
                     type="button"
                     disabled={courier.availability === "Offline"}
-                    title={courier.availability === "Offline" ? "Go online to accept service requests" : "Accept this request"}
+                    title={
+                      courier.availability === "Offline"
+                        ? "Go online to accept service requests"
+                        : "Accept this request"
+                    }
                     onClick={() =>
                       setState((current) =>
                         acceptOrder(current, order.id, courier.id),

@@ -46,7 +46,7 @@ server/
     schema.prisma
 ```
 
-Authentication uses Argon2 password hashing and HTTP-only session cookies. Google authentication remains outside the production scope until a real provider configuration is supplied.
+Authentication uses bcrypt password hashing and HTTP-only session cookies. Google authentication remains outside the production scope until a real provider configuration is supplied.
 
 ## Database Model
 

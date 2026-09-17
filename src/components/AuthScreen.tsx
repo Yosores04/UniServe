@@ -1,11 +1,7 @@
 import { useState, type FormEvent } from "react";
 import { Chrome, LockKeyhole, UserRound } from "lucide-react";
-import {
-  signIn,
-  signInWithGoogleDemo,
-  signUp,
-  type AuthUser,
-} from "../lib/auth";
+import { signInWithGoogleDemo, type AuthUser } from "../lib/auth";
+import { loginWithApi, registerWithApi } from "../lib/authClient";
 import type { Role } from "../types";
 
 export function AuthScreen({
@@ -20,17 +16,16 @@ export function AuthScreen({
   const [role, setRole] = useState<Role>("customer");
   const [error, setError] = useState("");
 
-  function submit(event: FormEvent<HTMLFormElement>) {
+  async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    const result =
-      mode === "login"
-        ? signIn(email, password)
-        : signUp(name, email, password, role);
-    if (!result.ok) {
-      setError(result.message);
-      return;
+    try {
+      const user = mode === "login"
+        ? await loginWithApi(email, password)
+        : await registerWithApi(name, email, password, role);
+      onAuthenticated(user);
+    } catch (submitError) {
+      setError(submitError instanceof Error ? submitError.message : "Unable to sign in.");
     }
-    onAuthenticated(result.user);
   }
 
   function switchMode(nextMode: "login" | "signup") {

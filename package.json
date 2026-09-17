@@ -1,5 +1,5 @@
 {
-  "name": "buksu-courier-demo",
+  "name": "uniserve",
   "private": true,
   "version": "0.1.0",
   "type": "module",
@@ -7,19 +7,40 @@
     "dev": "vite --host 127.0.0.1",
     "build": "tsc -b && vite build",
     "test": "vitest run --config vitest.config.ts",
-    "preview": "vite preview --host 127.0.0.1"
+    "preview": "vite preview --host 127.0.0.1",
+    "server:dev": "tsx watch server/src/server.ts",
+    "dev:full": "concurrently \"npm run server:dev\" \"npm run dev\"",
+    "server:build": "tsc -p server/tsconfig.json",
+    "server:test": "vitest run --config vitest.config.ts server/src",
+    "db:migrate": "prisma migrate dev",
+    "db:seed": "tsx prisma/seed.ts"
   },
   "dependencies": {
+    "@prisma/client": "^6.19.3",
+    "bcryptjs": "^3.0.3",
+    "cookie-parser": "^1.4.7",
+    "express": "^5.2.1",
+    "lucide-react": "^0.469.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "lucide-react": "^0.469.0"
+    "zod": "^4.6.5"
   },
   "devDependencies": {
+    "@types/cookie-parser": "^1.4.10",
+    "@types/express": "^5.0.6",
     "@types/react": "^19.0.2",
     "@types/react-dom": "^19.0.2",
+    "@types/supertest": "^7.2.1",
     "@vitejs/plugin-react": "^4.3.4",
+    "concurrently": "^9.2.4",
+    "prisma": "^6.19.3",
+    "supertest": "^7.2.2",
+    "tsx": "^4.23.13",
     "typescript": "^5.7.2",
     "vite": "^6.0.7",
     "vitest": "^2.1.8"
+  },
+  "prisma": {
+    "seed": "tsx prisma/seed.ts"
   }
 }

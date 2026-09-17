@@ -305,6 +305,18 @@ p {
   padding: 0 16px;
 }
 
+.active-portal {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  gap: 8px;
+  border-bottom: 4px solid var(--gold);
+  background: rgba(255, 255, 255, 0.09);
+  color: #fff;
+  font-weight: 850;
+  padding: 0 16px;
+}
+
 .buksu-nav button.active {
   border-bottom-color: var(--gold);
   background: rgba(255, 255, 255, 0.09);

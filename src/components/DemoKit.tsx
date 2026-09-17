@@ -63,20 +63,11 @@ export function UniversityHeader({
         </div>
       </div>
       <nav className="buksu-nav" aria-label="UniServe portals">
-        {portalConfigs.map((portal) => {
+        {(() => {
+          const portal = portalConfigs.find((candidate) => candidate.role === activeRole) ?? portalConfigs[0];
           const Icon = portalIcons[portal.role];
-          return (
-            <button
-              className={activeRole === portal.role ? "active" : ""}
-              key={portal.role}
-              type="button"
-              onClick={() => setRole(portal.role)}
-            >
-              <Icon size={17} />
-              <span>{portal.label}</span>
-            </button>
-          );
-        })}
+          return <span className="active-portal"><Icon size={17} /><span>{portal.label}</span></span>;
+        })()}
         <button className="reset-button" type="button" onClick={onReset}>
           Reset Demo
         </button>

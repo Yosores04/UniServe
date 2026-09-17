@@ -21,7 +21,7 @@
 - Create: `server/src/config/env.ts`
 - Test: `server/src/app.test.ts`
 
-- [ ] Add Express, Prisma, Argon2, cookie middleware, Zod, and Supertest dependencies.
+- [ ] Add Express, Prisma, bcryptjs, cookie middleware, Zod, and Supertest dependencies.
 - [ ] Add scripts: `server:dev`, `server:build`, `server:test`, `db:migrate`, and `db:seed`.
 - [ ] Configure Vite `/api` development proxy to the Express server.
 - [ ] Create an Express app factory with JSON parsing, cookie parsing, health endpoint, and centralized error responses.
@@ -59,7 +59,7 @@
 - Create: `server/src/modules/auth/auth.test.ts`
 - Modify: `server/src/app.ts`
 
-- [ ] Implement register with Zod validation, Argon2 hashing, role validation, profile creation, and HTTP-only session cookie.
+- [ ] Implement register with Zod validation, bcrypt hashing, role validation, profile creation, and HTTP-only session cookie.
 - [ ] Implement login, logout, and current-user endpoints.
 - [ ] Hash session tokens before database storage and expire sessions by timestamp.
 - [ ] Implement `authenticate` and `authorize(...roles)` middleware.

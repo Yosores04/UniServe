@@ -15,10 +15,12 @@ The current release is a frontend prototype intended for evaluation, presentatio
 
 ## Technology Stack
 
-- React 19
+- React 19 and Vite
 - TypeScript
-- Vite
-- Vitest
+- Express
+- Prisma ORM
+- SQLite for local development
+- Vitest and Supertest
 - Lucide React
 
 ## System Requirements
@@ -45,13 +47,26 @@ cd "path\to\UniServe"
 npm install
 ```
 
-5. Start the local development server:
+5. Create a local environment file:
 
 ```powershell
-npm run dev
+Copy-Item .env.example .env
 ```
 
-6. Open the local address displayed in the terminal. The default address is:
+6. Create the local database and seed the initial accounts:
+
+```powershell
+npm run db:migrate
+npm run db:seed
+```
+
+7. Start the frontend and backend together:
+
+```powershell
+npm run dev:full
+```
+
+8. Open the local address displayed in the terminal. The default address is:
 
 ```text
 http://localhost:5173/
@@ -82,38 +97,43 @@ The client environment does not need Node.js when the application is deployed as
 
 The client can then access the application through the hosting URL using a web browser. The generated files should be served through HTTP or HTTPS rather than opened directly from the local file system, because Vite asset paths require a web server.
 
-## Authentication
+## Authentication and Roles
 
-The current authentication interface is intended for workflow presentation and local evaluation. It includes:
+The application uses backend authentication with HTTP-only session cookies. Role permissions are enforced by the API and are not granted by changing frontend state. The four role areas are:
 
-- Email sign-in
-- Account registration
-- Role selection during registration
-- Guest access
-- A Google sign-in interface for presentation purposes
-- Sign-out from the application header
+- **Customer:** `/customer`
+- **Rider:** `/rider`
+- **Shop:** `/shop`
+- **Admin:** `/admin`
 
-Authentication data is not connected to a server, database, or identity provider in this release. No real Google credentials should be entered. Before production use, authentication must be replaced with a secure identity service and server-side authorization.
+Local seed accounts are available for development:
+
+| Role | Email | Password |
+| --- | --- | --- |
+| Admin | `admin@uniserve.local` | `Admin123!` |
+| Customer | `customer@uniserve.local` | `Customer123!` |
+| Rider | `rider@uniserve.local` | `Rider123!` |
+| Shop | `shop@uniserve.local` | `Shop123!` |
+
+These credentials are for local development only. Change them before any deployment.
 
 ## Application Data
 
-Orders, users, courier availability, store statuses, and activity updates are currently maintained in browser memory. Data is reset when the page is refreshed or the reset control is used.
+Orders, users, rider availability, shop statuses, complaints, chat messages, and ratings are stored in the local Prisma database.
 
-A production implementation will require:
-
-- A backend API
-- Persistent database storage
-- Secure authentication and password handling
-- Role-based authorization
-- Server-side order and payment validation
-- Production Google OAuth configuration, if Google sign-in is required
+The current implementation uses SQLite for local development. PostgreSQL can be used for production by changing `DATABASE_URL` and the Prisma datasource configuration.
 
 ## Development Commands
 
 ```powershell
 npm run dev       # Start the development server
+npm run dev:full  # Start the Vite frontend and Express API together
 npm run build     # Type-check and create the production build
 npm run test      # Run the automated test suite
+npm run server:test # Run backend API tests
+npm run server:build # Compile the backend
+npm run db:migrate # Apply Prisma migrations
+npm run db:seed   # Seed local role accounts and test data
 npm run preview   # Preview the production build
 ```
 
@@ -126,6 +146,11 @@ src/
   lib/                    Application state, authentication helpers, and tests
   portals/                Student, courier, entrepreneur, and admin workspaces
   styles.css              Responsive application styling
+server/
+  src/                    Express API, authentication, RBAC, and role modules
+prisma/
+  schema.prisma           Database schema
+  seed.ts                 Repeatable local development seed
 ```
 
 ## Verification
@@ -140,6 +165,8 @@ Create a production build to verify TypeScript compilation and bundling:
 
 ```powershell
 npm run build
+npm run server:test -- --run
+npm run server:build
 ```
 
 ## Repository

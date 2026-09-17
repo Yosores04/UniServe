@@ -1,0 +1,230 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  CUSTOMER
+  RIDER
+  SHOP
+  ADMIN
+}
+
+enum RiderAvailability {
+  ONLINE
+  OFFLINE
+}
+
+enum ShopVerification {
+  PENDING
+  VERIFIED
+  REJECTED
+}
+
+enum OrderStatus {
+  PENDING
+  ACCEPTED
+  PICKED_UP
+  ON_THE_WAY
+  DELIVERED
+  CANCELLED
+}
+
+enum ShopOrderStatus {
+  NEW
+  PREPARING
+  READY_FOR_PICKUP
+  COMPLETED
+}
+
+enum PaymentMethod {
+  COD
+  EWALLET
+}
+
+enum ComplaintStatus {
+  OPEN
+  RESOLVED
+}
+
+model User {
+  id              String           @id @default(cuid())
+  name            String
+  email           String           @unique
+  passwordHash    String
+  role            Role
+  active          Boolean          @default(true)
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  sessions        Session[]
+  customerProfile CustomerProfile?
+  riderProfile    RiderProfile?
+  ownedShop       Shop?
+  customerOrders  Order[]          @relation("CustomerOrders")
+  sentMessages    ChatMessage[]
+  complaints      Complaint[]
+  ratings         Rating[]
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  tokenHash String   @unique
+  userId    String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
+}
+
+model CustomerProfile {
+  id        String @id @default(cuid())
+  userId    String @unique
+  user      User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  campusId  String?
+  phone     String?
+}
+
+model RiderProfile {
+  id              String           @id @default(cuid())
+  userId          String           @unique
+  user            User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  verified        Boolean          @default(false)
+  availability    RiderAvailability @default(OFFLINE)
+  currentPoint    String?
+  earningsToday   Int              @default(0)
+  deliveriesToday Int              @default(0)
+  deliveries      Delivery[]
+}
+
+model Shop {
+  id              String           @id @default(cuid())
+  ownerId         String           @unique
+  owner           User             @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  name            String
+  category        String
+  location        String
+  rating          Float            @default(0)
+  salesToday      Int              @default(0)
+  open            Boolean          @default(true)
+  operatingHours  String
+  verification    ShopVerification @default(PENDING)
+  items           ShopItem[]
+  orders          Order[]
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+}
+
+model ShopItem {
+  id        String   @id @default(cuid())
+  shopId    String
+  name      String
+  price     Int
+  available Boolean  @default(true)
+  shop      Shop     @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  orderItems OrderItem[]
+
+  @@index([shopId])
+}
+
+model Order {
+  id              String           @id @default(cuid())
+  customerId      String
+  shopId          String
+  riderId         String?
+  serviceType     String
+  pickupPoint     String
+  dropoffPoint    String
+  status          OrderStatus      @default(PENDING)
+  shopStatus      ShopOrderStatus  @default(NEW)
+  paymentMethod   PaymentMethod    @default(COD)
+  subtotal        Int
+  deliveryFee     Int
+  total           Int
+  customerNote    String?
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  customer        User             @relation("CustomerOrders", fields: [customerId], references: [id])
+  shop            Shop             @relation(fields: [shopId], references: [id])
+  delivery        Delivery?
+  items           OrderItem[]
+  complaints      Complaint[]
+  chatThread      ChatThread?
+  rating          Rating?
+
+  @@index([customerId])
+  @@index([shopId])
+  @@index([riderId])
+  @@index([status])
+}
+
+model OrderItem {
+  id       String   @id @default(cuid())
+  orderId  String
+  shopItemId String?
+  name     String
+  quantity Int      @default(1)
+  unitPrice Int
+  order    Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  shopItem ShopItem? @relation(fields: [shopItemId], references: [id], onDelete: SetNull)
+}
+
+model Delivery {
+  id           String   @id @default(cuid())
+  orderId      String   @unique
+  riderId      String
+  acceptedAt   DateTime?
+  pickedUpAt   DateTime?
+  deliveredAt  DateTime?
+  order        Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  rider        RiderProfile @relation(fields: [riderId], references: [id])
+}
+
+model Complaint {
+  id        String          @id @default(cuid())
+  orderId   String
+  userId    String
+  subject   String
+  detail    String
+  status    ComplaintStatus  @default(OPEN)
+  resolution String?
+  createdAt DateTime        @default(now())
+  updatedAt DateTime        @updatedAt
+  order     Order           @relation(fields: [orderId], references: [id])
+  user      User            @relation(fields: [userId], references: [id])
+}
+
+model ChatThread {
+  id        String        @id @default(cuid())
+  orderId   String        @unique
+  order     Order         @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  messages  ChatMessage[]
+}
+
+model ChatMessage {
+  id        String     @id @default(cuid())
+  threadId  String
+  senderId  String
+  content   String
+  createdAt DateTime   @default(now())
+  thread    ChatThread @relation(fields: [threadId], references: [id], onDelete: Cascade)
+  sender    User       @relation(fields: [senderId], references: [id])
+
+  @@index([threadId, createdAt])
+}
+
+model Rating {
+  id        String   @id @default(cuid())
+  orderId   String   @unique
+  userId    String
+  score     Int
+  comment   String?
+  createdAt DateTime @default(now())
+  order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id])
+}
