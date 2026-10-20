@@ -1,5 +1,5 @@
 import { useRef, useState, type FormEvent } from "react";
-import { LockKeyhole } from "lucide-react";
+import { GraduationCap, LockKeyhole } from "lucide-react";
 import type { AuthUser } from "../lib/auth";
 import { loginWithApi, registerWithApi } from "../lib/authClient";
 import type { Role } from "../types";
@@ -51,8 +51,7 @@ export function AuthScreen({
     <main className="auth-shell">
       <section className="auth-card">
         <div className="auth-mark" aria-hidden="true">
-          <span>U</span>
-          <i />
+          <GraduationCap size={26} strokeWidth={1.6} />
         </div>
         <p className="auth-kicker">UniServe</p>
         <h1>{mode === "login" ? "Welcome back" : "Create your account"}</h1>
@@ -64,11 +63,12 @@ export function AuthScreen({
 
         <div
           className="auth-tabs"
-          role="tablist"
+          role="group"
           aria-label="Authentication mode"
         >
           <button
             className={mode === "login" ? "selected" : ""}
+            aria-pressed={mode === "login"}
             type="button"
             disabled={busy}
             onClick={() => switchMode("login")}
@@ -77,6 +77,7 @@ export function AuthScreen({
           </button>
           <button
             className={mode === "signup" ? "selected" : ""}
+            aria-pressed={mode === "signup"}
             type="button"
             disabled={busy}
             onClick={() => switchMode("signup")}

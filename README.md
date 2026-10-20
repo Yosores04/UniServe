@@ -13,6 +13,8 @@ The application includes the following user areas:
 
 The application uses a shared Express API and SQLite database. Orders, marketplace products, preparation updates, deliveries, chat, ratings, and approvals persist across browser sessions. Signed-in workspaces refresh approximately every two seconds.
 
+The dashboard uses a desktop sidebar and persistent phone navigation. Students switch between Marketplace and My orders; entrepreneurs use Orders, Products, and Shop settings; couriers use Job board, My deliveries, and History; administrators use Overview, Orders, Approvals, Reports, and People. Sellers add and edit products in focused dialogs. Unsaved shop/checkout drafts remain while switching sections and receiving live updates; reloading or signing out discards unsaved drafts.
+
 ## Updating and Running on a Friend's Laptop
 
 These steps assume Windows, Git and Node.js are installed, and the repository is already on the laptop. Open the project folder in VS Code and choose **Terminal > New Terminal**. Run each command separately; continue only if it finishes successfully.
@@ -88,7 +90,7 @@ npm run demo:setup
 npm run demo
 ```
 
-`demo:setup` creates `.env` only when missing, applies database migrations, and seeds the role accounts and three shops. Existing passwords, catalog edits, and order progress are preserved. Use Node.js 20.12 or later (a current LTS is recommended).
+`demo:setup` creates `.env` only when missing, applies database migrations, and seeds the role accounts and four shops (three verified, one student shop awaiting approval on a fresh setup). Existing passwords, catalog edits, approval decisions, and order progress are preserved. Use Node.js 20.12 or later (a current LTS is recommended).
 
 Keep the terminal and laptop running. Connect the laptop and all phones to the **same Wi-Fi/router or hotspot**, then open a `Phone` URL printed in the terminal, for example `http://10.0.0.42:5173/`. The address can change when the laptop changes networks; run `npm run demo:urls` to see it again. `localhost` on a phone refers to the phone itself, so use the laptop's network address.
 
@@ -208,9 +210,14 @@ Local seed accounts are available for development:
 | Rider    | `rider@uniserve.local`    | `Rider123!`    |
 | Shop     | `shop@uniserve.local`     | `Shop123!`     |
 | Student entrepreneur | `entrepreneur@uniserve.local` | `Shop123!` |
+| Student entrepreneur applicant | `student.seller@uniserve.local` | `Shop123!` |
 | Printing / errand shop | `printing@uniserve.local` | `Shop123!` |
 
 These credentials are for local development only. Change them before any deployment.
+
+Student entrepreneurs use the existing seller account type and entrepreneur workspace. On a fresh setup, **Alyssa Reyes** runs **Student Finds**, a verified shop selling notebooks, sticker packs, and crochet keychains. **Miguel Santos** runs **Study Break Bakes**, a student bakery awaiting admin approval. The seed also includes a Marketplace order for Student Finds so its seller queue can be demonstrated immediately. All names and businesses are fictional demo data.
+
+To demonstrate the new scope, sign in as the entrepreneur to manage products and prepare the sample order, or sign in as `student.seller@uniserve.local` to view the pending bakery. An admin can verify the bakery under **Approvals**; it then appears in the student marketplace. Reseeding preserves that approval. For an existing database, only the original generic `Student Entrepreneur` account label and unedited `Marketplace` category are upgraded; personalized names and shop edits are retained.
 
 ## Application Data
 
