@@ -1,6 +1,6 @@
-import { useState, type FormEvent } from "react";
-import { Chrome, LockKeyhole, UserRound } from "lucide-react";
-import { signInWithGoogleDemo, type AuthUser } from "../lib/auth";
+import { useRef, useState, type FormEvent } from "react";
+import { LockKeyhole } from "lucide-react";
+import type { AuthUser } from "../lib/auth";
 import { loginWithApi, registerWithApi } from "../lib/authClient";
 import type { Role } from "../types";
 
@@ -15,16 +15,30 @@ export function AuthScreen({
   const [password, setPassword] = useState("");
   const [role, setRole] = useState<Role>("customer");
   const [error, setError] = useState("");
+  const [busy, setBusy] = useState(false);
+  const submitting = useRef(false);
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (submitting.current) return;
+    submitting.current = true;
+    setBusy(true);
+    setError("");
     try {
-      const user = mode === "login"
-        ? await loginWithApi(email, password)
-        : await registerWithApi(name, email, password, role);
+      const user =
+        mode === "login"
+          ? await loginWithApi(email.trim(), password)
+          : await registerWithApi(name.trim(), email.trim(), password, role);
       onAuthenticated(user);
     } catch (submitError) {
-      setError(submitError instanceof Error ? submitError.message : "Unable to sign in.");
+      setError(
+        submitError instanceof Error
+          ? submitError.message
+          : "Unable to sign in.",
+      );
+    } finally {
+      submitting.current = false;
+      setBusy(false);
     }
   }
 
@@ -56,6 +70,7 @@ export function AuthScreen({
           <button
             className={mode === "login" ? "selected" : ""}
             type="button"
+            disabled={busy}
             onClick={() => switchMode("login")}
           >
             Log in
@@ -63,6 +78,7 @@ export function AuthScreen({
           <button
             className={mode === "signup" ? "selected" : ""}
             type="button"
+            disabled={busy}
             onClick={() => switchMode("signup")}
           >
             Sign up
@@ -74,6 +90,7 @@ export function AuthScreen({
             <label>
               Full name
               <input
+                required minLength={2} maxLength={100} autoComplete="name"
                 value={name}
                 onChange={(event) => setName(event.target.value)}
                 placeholder="e.g. Jessa M."
@@ -84,6 +101,7 @@ export function AuthScreen({
             Email address
             <input
               type="email"
+              required maxLength={254} autoComplete="email"
               value={email}
               onChange={(event) => setEmail(event.target.value)}
               placeholder="you@buksu.edu.ph"
@@ -93,6 +111,7 @@ export function AuthScreen({
             Password
             <input
               type="password"
+              required minLength={6} maxLength={128} autoComplete={mode === "signup" ? "new-password" : "current-password"}
               value={password}
               onChange={(event) => setPassword(event.target.value)}
               placeholder="At least 6 characters"
@@ -116,39 +135,15 @@ export function AuthScreen({
               {error}
             </p>
           )}
-          <button className="primary-button auth-submit" type="submit">
+          <button className="primary-button auth-submit" type="submit" disabled={busy}>
             <LockKeyhole size={17} />
-            {mode === "login" ? "Log in" : "Create account"}
+            {busy ? "Please wait…" : mode === "login" ? "Log in" : "Create account"}
           </button>
         </form>
 
-        <div className="auth-divider">
-          <span>or</span>
-        </div>
-        <button
-          className="google-button"
-          type="button"
-          onClick={() => onAuthenticated(signInWithGoogleDemo())}
-        >
-          <Chrome size={17} />
-          Continue with Google
-        </button>
-        <button
-          className="guest-button"
-          type="button"
-          onClick={() =>
-            onAuthenticated({
-              name: "Guest User",
-              email: "guest@demo.local",
-              role: "customer",
-            })
-          }
-        >
-          <UserRound size={16} />
-          Continue as guest
-        </button>
         <p className="auth-note">
-          Create your account here and get started with UniServe.
+          Sign in with your UniServe account. Student entrepreneurs can register,
+          set up a shop, and request admin verification.
         </p>
       </section>
     </main>

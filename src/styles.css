@@ -1291,6 +1291,49 @@ button:disabled {
   text-align: center;
 }
 
+.live-workspace { border: 0; padding: 0; margin: 0; min-width: 0; }
+.live-workspace:disabled { opacity: 0.78; }
+.live-sync { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 0; color: var(--muted); font-size: 0.85rem; }
+.live-sync.disconnected { color: #9a4d0b; }
+.live-warning { background: #fff3d6; color: #724214; padding: 14px 18px; border-radius: 8px; overflow-wrap: anywhere; }
+.live-saving { position: sticky; top: 8px; z-index: 5; background: var(--navy); color: white; padding: 10px 18px; border-radius: 8px; }
+.live-metric { display: grid; gap: 8px; padding: 17px; background: white; border: 1px solid #dce5ef; border-radius: 8px; }
+.live-metric span, .live-muted { color: var(--muted); font-size: 0.84rem; }
+.live-metric strong { font-size: 1.5rem; color: var(--navy); }
+.live-search, .live-label { display: grid; gap: 8px; margin: 16px 0; font-weight: 700; }
+.live-search input { max-width: 560px; }
+.live-shop-grid, .live-order-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); gap: 16px; margin: 16px 0; }
+.live-shop-card { display: grid; gap: 9px; padding: 20px; border: 1px solid #cfdaea; border-radius: 10px; text-align: left; background: #f8faff; color: var(--ink); cursor: pointer; }
+.live-shop-card.selected { border-color: var(--royal); box-shadow: inset 0 0 0 1px var(--royal); background: #edf3ff; }
+.live-shop-card strong { font-size: 1.1rem; }
+.live-shop-state { font-weight: 800; color: var(--royal); }
+.live-product { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 14px 0; border-bottom: 1px solid #e3e9f2; }
+.live-product > span { display: grid; gap: 7px; }
+.live-product input { width: 78px; flex-shrink: 0; }
+.live-product small { color: var(--muted); }
+.live-label textarea { min-height: 84px; resize: vertical; }
+.live-add-product, .live-product-editor { display: grid; gap: 12px; border-bottom: 1px solid #dde6f1; padding: 18px 0; }
+.live-add-product label, .live-product-editor label { display: grid; gap: 7px; }
+.live-order { border: 1px solid #dbe4f1; background: #fff; border-radius: 10px; padding: 18px; overflow-wrap: anywhere; min-width: 0; }
+.live-order-heading { display: flex; justify-content: space-between; align-items: start; gap: 12px; }
+.live-order-heading h3 { margin: 8px 0; }
+.live-order-heading > strong { white-space: nowrap; color: var(--navy); }
+.live-badges { display: flex; flex-wrap: wrap; gap: 6px; margin: 12px 0; }
+.live-badges span { border-radius: 6px; background: var(--soft-blue); color: var(--navy); padding: 6px 8px; font-size: 0.76rem; font-weight: 750; }
+.live-items { list-style: none; padding: 0; }
+.live-items li { display: flex; justify-content: space-between; gap: 10px; padding: 5px 0; }
+.live-items li span { white-space: nowrap; }
+.live-note { padding: 12px; background: #f4f7fb; border-radius: 6px; }
+.live-directory-card { display: grid; gap: 9px; border: 1px solid #dbe4f1; border-radius: 8px; padding: 16px; overflow-wrap: anywhere; }
+.live-directory-card p { margin: 0; }
+.live-rating { display: flex; flex-wrap: wrap; gap: 12px; align-items: end; margin: 16px 0; }
+.live-rating label { display: grid; gap: 6px; }
+.live-text-button { border: 0; padding: 12px 0; background: transparent; color: var(--royal); text-decoration: underline; cursor: pointer; }
+.live-notice { display: flex; align-items: center; justify-content: space-between; gap: 12px; background: var(--soft-blue); color: var(--navy); padding: 16px 22px; border-radius: 9px; }
+.row-actions { flex-wrap: wrap; }
+button:disabled { cursor: not-allowed; }
+input:focus-visible, textarea:focus-visible, select:focus-visible, button:focus-visible { outline: 3px solid #d5a72c; outline-offset: 3px; }
+
 @media (max-width: 1180px) {
   .portal-layout {
     grid-template-columns: 1fr;
@@ -1395,6 +1438,16 @@ button:disabled {
   .portal-sidebar {
     grid-template-columns: 1fr;
   }
+
+  .metric-strip { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+  .live-metric { padding: 12px; gap: 5px; }
+  .live-metric strong { font-size: 1.15rem; }
+  .live-metric span { font-size: 0.76rem; }
+  .portal-hero > div { padding: 18px; }
+  .portal-hero h1 { font-size: 1.35rem; }
+  .portal-hero aside { display: none; }
+  .portal-hero .hero-action { display: none; }
+  .live-sync { font-size: 0.76rem; }
 
   .checkout-bar {
     align-items: stretch;

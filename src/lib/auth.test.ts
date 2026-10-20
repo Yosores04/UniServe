@@ -1,21 +1,23 @@
-import { describe, expect, it } from "vitest";
-import { signIn, signInWithGoogleDemo, signUp } from "./auth";
+import { afterEach, describe, expect, it, vi } from "vitest";
+import { getCurrentUser, loginWithApi, registerWithApi } from "./authClient";
 
-describe("demo authentication", () => {
-  it("rejects incomplete sign-in details", () => {
-    expect(signIn("", "").ok).toBe(false);
+afterEach(() => vi.unstubAllGlobals());
+
+describe("server-authenticated identity", () => {
+  it("uses the server role when signing in", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response(JSON.stringify({ user: { id: "seller-1", name: "Seller", email: "seller@campus.local", role: "SHOP" } }))));
+    await expect(loginWithApi("seller@campus.local", "password123")).resolves.toMatchObject({ id: "seller-1", role: "store" });
   });
 
-  it("creates a user from valid sign-up details", () => {
-    const result = signUp("Jessa M.", "jessa@example.com", "campus123", "customer");
-
-    expect(result).toEqual({
-      ok: true,
-      user: { name: "Jessa M.", email: "jessa@example.com", role: "customer" }
-    });
+  it("requests a seller account through server registration", async () => {
+    const fetcher = vi.fn().mockResolvedValue(new Response(JSON.stringify({ user: { id: "seller-2", name: "New Seller", email: "new@campus.local", role: "SHOP" } })));
+    vi.stubGlobal("fetch", fetcher);
+    await expect(registerWithApi("New Seller", "new@campus.local", "password123", "store")).resolves.toMatchObject({ id: "seller-2", role: "store" });
+    expect(JSON.parse(fetcher.mock.calls[0][1].body).role).toBe("SHOP");
   });
 
-  it("provides a clearly demo-only Google session", () => {
-    expect(signInWithGoogleDemo().email).toBe("demo@buksu.edu.ph");
+  it("rejects expired sessions without fabricating a user", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response(JSON.stringify({ message: "Sign in is required." }), { status: 401 })));
+    await expect(getCurrentUser()).rejects.toMatchObject({ status: 401 });
   });
 });

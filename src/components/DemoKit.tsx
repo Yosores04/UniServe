@@ -39,14 +39,10 @@ export function money(value: number) {
 
 export function UniversityHeader({
   activeRole,
-  setRole,
-  onReset,
   userName,
   onLogout,
 }: {
   activeRole: Role;
-  setRole: (role: Role) => void;
-  onReset: () => void;
   userName?: string;
   onLogout?: () => void;
 }) {
@@ -64,13 +60,17 @@ export function UniversityHeader({
       </div>
       <nav className="buksu-nav" aria-label="UniServe portals">
         {(() => {
-          const portal = portalConfigs.find((candidate) => candidate.role === activeRole) ?? portalConfigs[0];
+          const portal =
+            portalConfigs.find((candidate) => candidate.role === activeRole) ??
+            portalConfigs[0];
           const Icon = portalIcons[portal.role];
-          return <span className="active-portal"><Icon size={17} /><span>{portal.label}</span></span>;
+          return (
+            <span className="active-portal">
+              <Icon size={17} />
+              <span>{portal.label}</span>
+            </span>
+          );
         })()}
-        <button className="reset-button" type="button" onClick={onReset}>
-          Reset Demo
-        </button>
         {userName && onLogout && (
           <button className="logout-button" type="button" onClick={onLogout}>
             {userName} · Log out

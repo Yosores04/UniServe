@@ -1,11 +1,11 @@
 import { Router } from "express";
 import { z } from "zod";
 import { prisma } from "../../db/prisma.js";
-import { authenticate } from "../../middleware/authenticate.js";
+import { authenticate, hashSessionToken } from "../../middleware/authenticate.js";
 import { createSession, login, register, sessionCookie } from "./auth.service.js";
 
 const authRouter = Router();
-const credentials = z.object({ email: z.string().email(), password: z.string().min(6) });
+const credentials = z.object({ email: z.string().trim().email().max(254), password: z.string().min(6).max(200) });
 
 function publicUser(user: { id: string; name: string; email: string; role: string }) {
   return { id: user.id, name: user.name, email: user.email, role: user.role };
@@ -13,7 +13,7 @@ function publicUser(user: { id: string; name: string; email: string; role: strin
 
 authRouter.post("/register", async (request, response, next) => {
   try {
-    const input = credentials.extend({ name: z.string().min(2), role: z.enum(["CUSTOMER", "RIDER", "SHOP"]) }).parse(request.body);
+    const input = credentials.extend({ name: z.string().trim().min(2).max(100), role: z.enum(["CUSTOMER", "RIDER", "SHOP"]) }).parse(request.body);
     const result = await register(input.name, input.email, input.password, input.role);
     response.cookie(sessionCookie, result.token, { httpOnly: true, sameSite: "lax", secure: process.env.NODE_ENV === "production", maxAge: 1000 * 60 * 60 * 24 * 7 });
     response.status(201).json({ user: publicUser(result.user) });
@@ -40,7 +40,7 @@ authRouter.post("/login", async (request, response, next) => {
 authRouter.post("/logout", authenticate, async (request, response, next) => {
   try {
     const token = request.cookies?.[sessionCookie];
-    if (token) await prisma.session.deleteMany({ where: { userId: request.user!.id } });
+    if (token) await prisma.session.deleteMany({ where: { userId: request.user!.id, tokenHash: hashSessionToken(token) } });
     response.clearCookie(sessionCookie);
     response.status(204).send();
   } catch (error) {

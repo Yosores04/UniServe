@@ -5,6 +5,7 @@ import { customerRouter } from "./modules/customer/customer.routes.js";
 import { riderRouter } from "./modules/rider/rider.routes.js";
 import { shopRouter } from "./modules/shop/shop.routes.js";
 import { adminRouter } from "./modules/admin/admin.routes.js";
+import { workspaceRouter } from "./modules/workspace.routes.js";
 
 export function createApp() {
   const app = express();
@@ -17,6 +18,7 @@ export function createApp() {
   app.use("/api/rider", riderRouter);
   app.use("/api/shop", shopRouter);
   app.use("/api/admin", adminRouter);
+  app.use("/api", workspaceRouter);
 
   app.get("/api/health", (_request, response) => {
     response.json({ status: "ok", service: "uniserve-api" });
@@ -29,6 +31,10 @@ export function createApp() {
     }
     if (error instanceof Error && "code" in error && error.code === "P2002") {
       response.status(409).json({ error: "CONFLICT", message: "The requested record already exists." });
+      return;
+    }
+    if (error instanceof Error && "code" in error && error.code === "P2025") {
+      response.status(404).json({ error: "NOT_FOUND", message: "Record not found." });
       return;
     }
     console.error(error);
