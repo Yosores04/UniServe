@@ -1,6 +1,6 @@
 /* UniServe — a shared visual language for every campus workspace. */
 :root {
-  font-family: "Segoe UI", -apple-system, BlinkMacSystemFont, ui-sans-serif, sans-serif;
+  font-family: Roboto, system-ui, "Segoe UI", sans-serif;
   color: #24334a;
   background: #f6f8fc;
   font-synthesis: none;
@@ -73,7 +73,6 @@ button:focus-visible, a:focus-visible, summary:focus-visible { outline: 3px soli
 .workspace-sidebar { position: sticky; top: 0; height: 100vh; display: flex; flex-direction: column; padding: 34px 20px 0; background: white; border-right: 1px solid var(--line); z-index: 20; }
 .workspace-brand { display: flex; gap: 11px; align-items: center; color: var(--navy); font-size: 23px; font-weight: 750; letter-spacing: -.8px; line-height: 1.2; }
 .workspace-brand small { display: block; margin-top: 5px; font-size: 9px; font-weight: 400; letter-spacing: .1px; color: #929caf; }
-.brand-symbol { display: grid; place-items: center; width: 40px; height: 44px; background: var(--navy); color: var(--gold); border-radius: 12px 12px 12px 3px; box-shadow: 0 4px 8px #182b4910; }
 .brand-accent { color: var(--royal); }
 .sidebar-brand { padding: 0 10px 42px; }
 .sidebar-caption { padding: 0 14px 12px; color: #a2acbb; font-size: 9px; font-weight: 600; letter-spacing: .15em; }
@@ -287,3 +286,26 @@ button:focus-visible, a:focus-visible, summary:focus-visible { outline: 3px soli
   .workspace-content { padding-left: 14px; padding-right: 14px; }.workspace-topbar { padding-left: 14px; padding-right: 14px; }.connection-status span { display: none; }.page-heading h1 { font-size: 23px; }.metric-strip { gap: 9px; }.live-metric { padding: 12px; }.live-metric small { display: none; }.metric-icon { width: 22px; height: 22px; }.live-metric > strong { font-size: 22px; }.panel { padding: 17px; }.shop-grid { grid-template-columns: 1fr; }.shop-visual { height: 84px; }.shop-card > strong { font-size: 14px; }.form-grid { grid-template-columns: 1fr; }.auth-card { padding: 27px; }.live-notice { flex-wrap: wrap; }
 }
 @media (prefers-reduced-motion: reduce) { *,*::before,*::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; } }
+
+.action-label { display: none; }
+button.user-avatar.small { width: 44px; height: 44px; }
+@media (max-width: 740px) {
+  .app-shell { display: grid; height: 100vh; height: 100dvh; min-height: 0; grid-template: minmax(0,1fr) auto / minmax(0,1fr); }
+  .workspace-main { grid-row: 1; min-height: 0; overflow-y: auto; padding-bottom: 1rem; }
+  .workspace-sidebar { display: block; grid-row: 2; position: static; height: auto; padding: 0; border: 0; }
+  .workspace-navigation { position: static; background: #fff; backdrop-filter: none; padding: 5px 6px calc(5px + env(safe-area-inset-bottom)); }
+  .workspace-navigation button { gap: 3px; min-height: 54px; line-height: 1.2; font-size: 12px; color: #4b5a70; }
+  .workspace-navigation button svg { width: 22px; height: 22px; }
+  .workspace-navigation button[aria-current="page"] { color: #2546ae; background: #eaf0ff; }
+  .workspace-topbar { height: 58px; padding: 0 12px; background: #fff; }
+  .workspace-topbar .header-action { display: inline-flex; width: auto; padding: 5px 7px; gap: 4px; color: #43536c; }
+  .action-label { display: inline; font-size: 12px; }
+  .connection-status:not(.is-offline) { display: none; }
+  .page-heading h1 { font-size: 26px; line-height: 1.2; }
+  .panel-header h2, .panel > h2 { font-size: 18px; }
+  .panel-header .eyebrow { font-size: 10px; }
+  label, .primary-button, .secondary-button, .chip-button { font-size: 14px; }
+  .workspace-content { padding-top: 20px; }
+  .market-workspace .market-basket-button { bottom: .5rem; }
+  .market-services strong { font-size: 12px; }
+}

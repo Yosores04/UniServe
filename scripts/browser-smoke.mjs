@@ -51,7 +51,7 @@ try {
     throw new Error(`Condition not met: ${expression}`);
   };
   const roles = [
-    ["customer", "customer@uniserve.local", "Customer123!", ["marketplace", "orders"]],
+    ["customer", "customer@uniserve.local", "Customer123!", ["marketplace", "orders", "profile"]],
     ["seller", "entrepreneur@uniserve.local", "Shop123!", ["orders", "products", "settings"]],
     ["courier", "rider@uniserve.local", "Rider123!", ["jobs", "deliveries", "history"]],
     ["admin", "admin@uniserve.local", "Admin123!", ["overview", "orders", "approvals", "reports", "people"]],
@@ -81,6 +81,14 @@ try {
         await call("Emulation.setDeviceMetricsOverride", { width, height: 1000, deviceScaleFactor: 1, mobile: width < 600 }, sessionId);
         const dimensions = await evaluate(sessionId, "({width:innerWidth,scroll:document.documentElement.scrollWidth})");
         if (dimensions.scroll > dimensions.width + 1) throw new Error(`${role}/${section}: horizontal overflow ${JSON.stringify(dimensions)}`);
+        if (width < 600) {
+          const tabsVisible = await evaluate(sessionId, `[...document.querySelectorAll('.workspace-navigation button')].every(button => {
+            const rect = button.getBoundingClientRect();
+            return button.textContent.trim() && rect.top >= 0 && rect.bottom <= innerHeight + 1 &&
+              button.contains(document.elementFromPoint(rect.x + rect.width / 2, rect.y + rect.height / 2));
+          })`);
+          if (!tabsVisible) throw new Error(`${role}/${section}: bottom navigation is clipped or covered`);
+        }
         const smallInput = await evaluate(sessionId, `Array.from(document.querySelectorAll('input, select, textarea, button')).filter(${visible}).find(element => element.getBoundingClientRect().height < 43.9)?.outerHTML ?? null`);
         if (smallInput) throw new Error(`${role}/${section}: cramped control ${smallInput}`);
         if (width < 600) {

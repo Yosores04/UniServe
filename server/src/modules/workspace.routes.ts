@@ -14,7 +14,7 @@ workspaceRouter.get("/workspace", authenticate, async (request, response, next) 
     const orders = await prisma.order.findMany({ where, include: orderInclude, orderBy: { createdAt: "desc" } });
     const visibleOrders = orders.map(order => {
       if (user.role !== "RIDER" || order.riderId === rider?.id) return order;
-      const { customer, chatThread, customerId, customerNote, ...job } = order;
+      const { customer, chatThread, customerId, customerNote, dropoffLatitude, dropoffLongitude, ...job } = order;
       return job;
     });
     const shops = await prisma.shop.findMany({ where: admin ? {} : user.role === "SHOP" ? { ownerId: user.id } : { verification: "VERIFIED", owner: { active: true } }, include: { items: true, ...(admin ? { owner: { select: publicUserSelect } } : {}) } });
@@ -28,6 +28,15 @@ workspaceRouter.get("/workspace", authenticate, async (request, response, next) 
       admin ? prisma.user.findMany({ select: publicUserSelect }) : [],
       prisma.complaint.findMany({ where: admin ? {} : { userId: user.id }, include: { user: { select: publicUserSelect } }, orderBy: { createdAt: "desc" } })
     ]);
-    response.json({ shops: scopedShops, orders: visibleOrders, rider, riders: await Promise.all(riders.map(riderMetrics)), users, complaints });
+    let account;
+    if (user.role === "CUSTOMER") {
+      const [contact, ownedShop] = await Promise.all([
+        prisma.customerProfile.findUnique({ where: { userId: user.id }, select: { phone: true } }),
+        prisma.shop.findUnique({ where: { ownerId: user.id }, include: { items: { orderBy: { id: "asc" } } } }),
+      ]);
+      const sellerOrders = ownedShop ? await prisma.order.findMany({ where: { shopId: ownedShop.id }, include: orderInclude, orderBy: { createdAt: "desc" } }) : [];
+      account = { profile: { name: user.name, email: user.email, phone: contact?.phone ?? null }, ownedShop, sellerOrders };
+    }
+    response.json({ ...account, shops: scopedShops, orders: visibleOrders, rider, riders: await Promise.all(riders.map(riderMetrics)), users, complaints });
   } catch (error) { next(error); }
 });

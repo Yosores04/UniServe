@@ -4,7 +4,13 @@ import { createWorkspaceSync } from "./workspaceSync";
 
 export type PublicUser = { id: string; name: string; email?: string; role?: string; active?: boolean };
 export type Product = { id: string; name: string; price: number; available: boolean; shopId: string };
+export type MapPoint = { latitude: number; longitude: number };
+export function mapPoint(latitude?: number | null, longitude?: number | null): MapPoint | null {
+  return typeof latitude === "number" && Number.isFinite(latitude) && Math.abs(latitude) <= 90 &&
+    typeof longitude === "number" && Number.isFinite(longitude) && Math.abs(longitude) <= 180 ? { latitude, longitude } : null;
+}
 export type Shop = {
+  latitude?: number | null; longitude?: number | null;
   id: string; ownerId: string; name: string; category: string; location: string;
   operatingHours: string; open: boolean; verification: "PENDING" | "VERIFIED" | "REJECTED";
   items: Product[]; salesToday: number; rating: number;
@@ -15,6 +21,8 @@ export type Rider = {
   earningsToday: number; deliveriesToday: number;
 };
 export type LiveOrder = {
+  pickupLatitude?: number | null; pickupLongitude?: number | null;
+  dropoffLatitude?: number | null; dropoffLongitude?: number | null;
   id: string; customerId?: string; shopId: string; riderId: string | null;
   serviceType: string; pickupPoint: string; dropoffPoint: string;
   status: "PENDING" | "ACCEPTED" | "PICKED_UP" | "ON_THE_WAY" | "DELIVERED" | "CANCELLED";
@@ -26,7 +34,12 @@ export type LiveOrder = {
   chatThread?: { messages: { id: string; content: string; createdAt: string; sender?: PublicUser }[] } | null;
 };
 export type LiveComplaint = { id: string; subject: string; detail: string; status: "OPEN" | "RESOLVED"; resolution?: string | null };
-export type Workspace = { shops: Shop[]; orders: LiveOrder[]; rider: Rider | null; riders: Rider[]; users: PublicUser[]; complaints: LiveComplaint[] };
+export type Workspace = {
+  shops: Shop[]; orders: LiveOrder[]; rider: Rider | null; riders: Rider[]; users: PublicUser[]; complaints: LiveComplaint[];
+  profile?: { name: string; email: string; phone: string | null };
+  ownedShop?: Shop | null;
+  sellerOrders?: LiveOrder[];
+};
 export type Mutate = (path: string, body?: unknown, method?: "POST" | "PATCH") => Promise<boolean>;
 
 export function useWorkspace(onExpired: () => void) {

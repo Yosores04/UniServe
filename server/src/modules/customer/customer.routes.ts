@@ -5,8 +5,23 @@ import { authenticate } from "../../middleware/authenticate.js";
 import { authorize } from "../../middleware/authorize.js";
 import { orderInclude, publicUserSelect, shopMetrics } from "../../db/public.js";
 
+import { activeDeliveryStatuses, locationReadLifetimeMs, pin } from "../location.js";
+
 const router = Router();
 router.use(authenticate, authorize("CUSTOMER"));
+
+router.patch("/profile", async (req, res) => {
+  const { name, phone } = z.object({
+    name: z.string().trim().min(2).max(100),
+    phone: z.string().trim().min(5).max(32).regex(/^[+\d][\d ()-]+$/).nullable(),
+  }).parse(req.body);
+  const user = await prisma.user.update({
+    where: { id: req.user!.id },
+    data: { name, customerProfile: { upsert: { create: { phone }, update: { phone } } } },
+    select: { name: true, email: true },
+  });
+  res.json({ profile: { ...user, phone } });
+});
 
 router.get("/shops", async (_request, response, next) => {
   try { response.json({ shops: await Promise.all((await prisma.shop.findMany({ where: { verification: "VERIFIED", owner: { active: true } }, include: { items: true } })).map(shopMetrics)) }); } catch (error) { next(error); }
@@ -24,9 +39,27 @@ router.get("/orders/:orderId", async (request, response, next) => {
   } catch (error) { next(error); }
 });
 
+router.get("/orders/:orderId/location", async (req, res) => {
+  res.set("Cache-Control", "private, no-store");
+  const order = await prisma.order.findFirst({
+    where: { id: req.params.orderId, customerId: req.user!.id },
+    select: {
+      status: true, riderId: true, delivery: { select: { riderId: true, deliveredAt: true } },
+      courierLocation: { select: { latitude: true, longitude: true, recordedAt: true } },
+    },
+  });
+  if (!order) {
+    res.status(404).json({ error: "NOT_FOUND", message: "Order not found." });
+    return;
+  }
+  const location = order.courierLocation;
+  const active = activeDeliveryStatuses.includes(order.status) && order.delivery && !order.delivery.deliveredAt && order.riderId === order.delivery.riderId;
+  res.json({ location: active && location && Date.now() - location.recordedAt.getTime() <= locationReadLifetimeMs ? location : null });
+});
+
 router.post("/orders", async (request, response, next) => {
   try {
-    const input = z.object({ shopId: z.string().min(1).max(100), serviceType: z.enum(["Food", "Printing", "Errand", "Marketplace"]), pickupPoint: z.string().trim().min(1).max(200), dropoffPoint: z.string().trim().min(1).max(200), customerNote: z.string().trim().max(1000).optional(), paymentMethod: z.enum(["COD", "EWALLET"]), items: z.array(z.object({ shopItemId: z.string().min(1).max(100), quantity: z.number().int().min(1).max(100) })).min(1).max(50) }).parse(request.body);
+    const input = z.object({ dropoffPin: pin.nullish(), shopId: z.string().min(1).max(100), serviceType: z.enum(["Food", "Printing", "Errand", "Marketplace"]), pickupPoint: z.string().trim().min(1).max(200), dropoffPoint: z.string().trim().min(1).max(200), customerNote: z.string().trim().max(1000).optional(), paymentMethod: z.enum(["COD", "EWALLET"]), items: z.array(z.object({ shopItemId: z.string().min(1).max(100), quantity: z.number().int().min(1).max(100) })).min(1).max(50) }).parse(request.body);
     const shop = await prisma.shop.findFirst({ where: { id: input.shopId, verification: "VERIFIED", owner: { active: true }, open: true }, include: { items: true } });
     if (!shop) { response.status(404).json({ error: "SHOP_UNAVAILABLE", message: "This shop is not available." }); return; }
     if (shop.location.trim() === input.dropoffPoint) { response.status(400).json({ error: "INVALID_ROUTE", message: "Pickup and drop-off locations must be different." }); return; }
@@ -35,7 +68,7 @@ router.post("/orders", async (request, response, next) => {
     const subtotal = selected.reduce((sum, item) => sum + item.shopItem!.price * item.quantity, 0);
     const deliveryFee = input.serviceType === "Errand" ? 35 : 25;
     if (!Number.isSafeInteger(subtotal) || subtotal > 100000000) { response.status(400).json({ error: "ORDER_TOO_LARGE", message: "The order value exceeds the supported limit." }); return; }
-    const order = await prisma.order.create({ data: { customerId: request.user!.id, shopId: shop.id, serviceType: input.serviceType, pickupPoint: shop.location.trim(), dropoffPoint: input.dropoffPoint, paymentMethod: input.paymentMethod, subtotal, deliveryFee, total: subtotal + deliveryFee, customerNote: input.customerNote, items: { create: selected.map((item) => ({ shopItemId: item.shopItemId, name: item.shopItem!.name, quantity: item.quantity, unitPrice: item.shopItem!.price })) }, chatThread: { create: {} } }, include: { items: true, shop: true } });
+    const order = await prisma.order.create({ data: { customerId: request.user!.id, shopId: shop.id, serviceType: input.serviceType, pickupPoint: shop.location.trim(), dropoffPoint: input.dropoffPoint, pickupLatitude: shop.latitude, pickupLongitude: shop.longitude, dropoffLatitude: input.dropoffPin?.latitude, dropoffLongitude: input.dropoffPin?.longitude, paymentMethod: input.paymentMethod, subtotal, deliveryFee, total: subtotal + deliveryFee, customerNote: input.customerNote, items: { create: selected.map((item) => ({ shopItemId: item.shopItemId, name: item.shopItem!.name, quantity: item.quantity, unitPrice: item.shopItem!.price })) }, chatThread: { create: {} } }, include: { items: true, shop: true } });
     response.status(201).json({ order });
   } catch (error) { next(error); }
 });

@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">UniServe</string>
+    <string name="title_activity_main">UniServe</string>
+    <string name="package_name">ph.edu.buksu.uniserve.dev</string>
+    <string name="custom_url_scheme">ph.edu.buksu.uniserve.dev</string>
+</resources>

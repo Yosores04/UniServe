@@ -1,0 +1,29 @@
+.market-services, .market-shops { display: grid; gap: .65rem; margin-block: 1rem; }
+.market-services { grid-template-columns: repeat(4,minmax(0,1fr)); }
+.market-services button, .market-shop, .market-track, .market-quantity button {
+  border: 1px solid var(--line); border-radius: 14px; background: white; color: var(--navy);
+}
+.market-services button { display: grid; place-items: center; gap: .5rem; padding: .85rem .15rem; }
+.market-services button[aria-pressed="true"] { background: #edf2ff; border-color: var(--royal); color: var(--royal); }
+.market-services strong { font-size: clamp(.65rem,2.4vw,.85rem); }
+.market-shops { grid-template-columns: repeat(auto-fit,minmax(min(100%,16rem),1fr)); }
+.market-shop { overflow: hidden; }
+.market-shop-link, .market-hit { width: 100%; background: transparent; border: 0; text-align: left; color: inherit; }
+.market-shop-link { display: grid; gap: .35rem; padding: 1rem; }
+.market-shop-heading, .market-hit, .market-controls, .market-quantity, .market-track { display: flex; align-items: center; justify-content: space-between; gap: .5rem; }
+.market-shop-link > span, .market-track small { font-size: .83rem; }
+.market-shop-heading strong { font-size: 1rem; }
+.market-shop-action, .market-shop-link span:has(>svg) { display: flex; align-items: center; gap: .4rem; }
+.market-shop-action { color: var(--royal); margin-top: .5rem; font-weight: 600; }
+.market-hit { border-top: 1px solid var(--line); padding: .75rem 1rem; }
+.market-track { padding: 1rem; text-align: left; background: #eef4ff; order: -1; }
+.market-track > span { flex: 1; display: grid; gap: .2rem; }
+.market-controls { font-size: .85rem; }
+.market-workspace .market-basket-button { position: sticky; bottom: 5.3rem; z-index: 2; justify-content: center; width: 100%; }
+.market-quantity { gap: .15rem; }
+.market-quantity input { width: 2.6rem; padding: .3rem; text-align: center; }
+.market-quantity button { width: 2.5rem; min-height: 2.7rem; font-size: 1.15rem; }
+.market-review { display: grid; grid-template-columns: auto 1fr; gap: .65rem 1rem; margin: 1rem 0; }
+.market-review dd { margin: 0; overflow-wrap: anywhere; }
+.market-workspace .catalog-row { display: flex; flex-wrap: wrap; justify-content: space-between; }
+@media (min-width: 761px) { .market-workspace .market-basket-button { bottom: 1rem; } }

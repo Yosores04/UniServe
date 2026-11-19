@@ -1,0 +1,21 @@
+.profile-heading { display: flex; gap: 14px; align-items: center; }
+.profile-heading > div { min-width: 0; overflow-wrap: anywhere; }
+.profile-heading h2 { margin: 0; font-size: 19px; }
+.profile-heading p { display: flex; align-items: center; gap: 7px; margin: 4px 0 0; font-size: 13px; color: #586981; }
+.profile-heading svg, .profile-review svg { flex-shrink: 0; }
+.profile-icon { width: 46px; height: 46px; border-radius: 14px; flex-shrink: 0; display: grid; place-items: center; color: var(--royal); background: var(--soft-blue); }
+.profile-store-icon { background: #fff3d4; color: #815515; }
+.profile-detail-row { display: flex; flex-wrap: wrap; gap: 14px; align-items: center; justify-content: space-between; margin-top: 22px; padding-top: 18px; border-top: 1px solid var(--line); }
+.profile-detail-row span, .profile-detail-row strong { display: block; }
+.profile-detail-row span { font-size: 12px; color: #586981; }
+.profile-detail-row strong { margin-top: 3px; font-size: 14px; color: var(--navy); }
+.profile-feedback { font-size: 13px; color: #216749; margin-bottom: 0; }
+.profile-review { display: flex; align-items: flex-start; gap: 10px; background: #fff8e7; color: #765016; margin-top: 18px; padding: 15px; border-radius: 10px; font-size: 14px; }
+.profile-review[data-state="VERIFIED"] { color: #245e45; background: #eff8f2; }
+.profile-review[data-state="REJECTED"] { color: #964055; background: #fff1f4; }
+.profile-review p { font-size: 13px; margin: 3px 0 0; }
+.profile-action { margin-top: 18px; }
+.profile-fieldset { min-width: 0; margin: 0; padding: 0; border: 0; }
+.profile-fieldset legend { padding: 0 0 10px; font-size: 14px; font-weight: 650; color: var(--navy); }
+.profile-shop { min-width: 0; }
+.profile-shop > nav { margin: 0 0 14px; }

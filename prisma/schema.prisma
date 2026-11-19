@@ -109,6 +109,8 @@ model Shop {
   name            String
   category        String
   location        String
+  latitude        Float?
+  longitude       Float?
   rating          Float            @default(0)
   salesToday      Int              @default(0)
   open            Boolean          @default(true)
@@ -140,6 +142,10 @@ model Order {
   serviceType     String
   pickupPoint     String
   dropoffPoint    String
+  pickupLatitude  Float?
+  pickupLongitude Float?
+  dropoffLatitude Float?
+  dropoffLongitude Float?
   status          OrderStatus      @default(PENDING)
   shopStatus      ShopOrderStatus  @default(NEW)
   paymentMethod   PaymentMethod    @default(COD)
@@ -152,6 +158,7 @@ model Order {
   customer        User             @relation("CustomerOrders", fields: [customerId], references: [id])
   shop            Shop             @relation(fields: [shopId], references: [id])
   delivery        Delivery?
+  courierLocation CourierLocation?
   items           OrderItem[]
   complaints      Complaint[]
   chatThread      ChatThread?
@@ -161,6 +168,14 @@ model Order {
   @@index([shopId])
   @@index([riderId])
   @@index([status])
+}
+
+model CourierLocation {
+  orderId    String    @id
+  latitude   Float
+  longitude  Float
+  recordedAt DateTime
+  order      Order     @relation(fields: [orderId], references: [id], onDelete: Cascade)
 }
 
 model OrderItem {

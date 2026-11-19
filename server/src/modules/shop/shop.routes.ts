@@ -5,14 +5,36 @@ import { orderInclude, shopMetrics } from "../../db/public.js";
 import { authenticate } from "../../middleware/authenticate.js";
 import { authorize } from "../../middleware/authorize.js";
 
+import { pin, shopPinFields } from "../location.js";
+
 const router = Router();
-router.use(authenticate, authorize("SHOP"));
+router.use(authenticate, authorize("SHOP", "CUSTOMER"));
 const text = z.string().trim().min(2).max(200);
-const profile = z.object({ name: text, category: text, location: text, operatingHours: text });
+const profile = z.object({ name: text, category: text, location: text, operatingHours: text, pin: pin.nullish() });
 const item = z.object({ name: text, price: z.number().int().min(1).max(1000000), available: z.boolean().optional() });
+router.post("/applications", authorize("CUSTOMER"), async (req, res) => {
+  const { product, pin: shopPin, ...details } = profile.extend({ product: item.pick({ name: true, price: true }) }).parse(req.body);
+  const ownerId = req.user!.id;
+  const result = await prisma.$transaction(async (db) => {
+    const existing = await db.shop.findUnique({ where: { ownerId }, select: { id: true, verification: true } });
+    if (!existing) {
+      const shop = await db.shop.create({ data: { ...details, ...shopPinFields(shopPin), ownerId, items: { create: product } }, include: { items: true } });
+      return { status: 201, shop };
+    }
+    if (existing.verification !== "REJECTED") return null;
+    const updated = await db.shop.updateMany({ where: { ownerId, verification: "REJECTED" }, data: { ...details, ...shopPinFields(shopPin), verification: "PENDING" } });
+    if (!updated.count) return null;
+    const first = await db.shopItem.findFirst({ where: { shopId: existing.id }, orderBy: { id: "asc" } });
+    if (first) await db.shopItem.update({ where: { id: first.id }, data: product });
+    else await db.shopItem.create({ data: { ...product, shopId: existing.id } });
+    return { status: 200, shop: await db.shop.findUniqueOrThrow({ where: { ownerId }, include: { items: true } }) };
+  });
+  if (!result) { res.status(409).json({ message: "Your shop already has an application." }); return; }
+  res.status(result.status).json({ shop: result.shop });
+});
 router.get("/profile", async (req, res) => { const shop = await prisma.shop.findUnique({ where: { ownerId: req.user!.id }, include: { items: true } }); res.json({ shop: shop ? await shopMetrics(shop) : null }); });
-router.post("/profile", async (req, res) => { const input = profile.parse(req.body); res.status(201).json({ shop: await prisma.shop.create({ data: { ...input, ownerId: req.user!.id }, include: { items: true } }) }); });
-router.patch("/profile", async (req, res) => { const input = profile.partial().extend({ open: z.boolean().optional() }).parse(req.body); res.json({ shop: await prisma.shop.update({ where: { ownerId: req.user!.id }, data: input, include: { items: true } }) }); });
+router.post("/profile", authorize("SHOP"), async (req, res) => { const { pin: shopPin, ...input } = profile.parse(req.body); res.status(201).json({ shop: await prisma.shop.create({ data: { ...input, ...shopPinFields(shopPin), ownerId: req.user!.id }, include: { items: true } }) }); });
+router.patch("/profile", async (req, res) => { const { pin: shopPin, ...input } = profile.partial().extend({ open: z.boolean().optional() }).parse(req.body); res.json({ shop: await prisma.shop.update({ where: { ownerId: req.user!.id }, data: { ...input, ...shopPinFields(shopPin) }, include: { items: true } }) }); });
 router.get("/items", async (req, res) => { res.json({ items: await prisma.shopItem.findMany({ where: { shop: { ownerId: req.user!.id } } }) }); });
 router.post("/items", async (req, res) => {
   const input = item.parse(req.body);

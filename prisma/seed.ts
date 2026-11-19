@@ -7,6 +7,9 @@ async function account(email: string, name: string, role: Role, password: string
   return prisma.user.upsert({ where: { email }, update: {}, create: { email, name, role, passwordHash: await bcrypt.hash(password, 12) } });
 }
 async function main() {
+  if (process.env.NODE_ENV === "production" || !process.env.DATABASE_URL?.startsWith("file:")) {
+    throw new Error("Demo accounts require a local SQLite development database.");
+  }
   await account("admin@uniserve.local", "UniServe Administrator", "ADMIN", "Admin123!");
   const customer = await account("customer@uniserve.local", "Jessa M.", "CUSTOMER", "Customer123!");
   await prisma.customerProfile.upsert({ where: { userId: customer.id }, update: {}, create: { userId: customer.id, campusId: "student-001" } });

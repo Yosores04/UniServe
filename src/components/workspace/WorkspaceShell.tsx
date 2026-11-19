@@ -3,9 +3,7 @@ import { ArrowUpRight, ChevronRight, GraduationCap, LogOut, RefreshCw, Wifi, Wif
 import type { AuthUser } from "../../lib/auth";
 import { getWorkspaceNavigation } from "../../lib/workspaceNavigation";
 
-function Brand() {
-  return <div className="workspace-brand"><span className="brand-symbol"><GraduationCap size={23} strokeWidth={1.8} /></span><span>Uni<span className="brand-accent">Serve</span><small>A little closer to campus.</small></span></div>;
-}
+import { Brand } from "../Brand";
 
 export function WorkspaceShell({ user, section, onSectionChange, connected, syncing, lastSynced, onRefresh, onLogout, signingOut, children }: {
   user: AuthUser; section: string; onSectionChange: (section: string) => void;
@@ -20,7 +18,7 @@ export function WorkspaceShell({ user, section, onSectionChange, connected, sync
       <div className="sidebar-brand"><Brand /></div>
       <span className="sidebar-caption">YOUR WORKSPACE</span>
       <nav className="workspace-navigation" aria-label={config.label}>
-        {config.sections.map(({ id, label, icon: Icon }) => <button type="button" key={id} data-section={id} aria-current={section === id ? "page" : undefined} onClick={() => onSectionChange(id)}><Icon size={20} strokeWidth={1.8} /><span>{label}</span>{section === id && <span className="nav-indicator" aria-hidden="true" />}</button>)}
+        {config.sections.map(({ id, label, icon: Icon }) => <button type="button" key={id} data-section={id} aria-current={section === id ? "page" : undefined} onClick={() => onSectionChange(id)}><Icon size={22} strokeWidth={1.8} aria-hidden="true" /><span>{label}</span>{section === id && <span className="nav-indicator" aria-hidden="true" />}</button>)}
       </nav>
       <div className="sidebar-bottom">
         <div className="campus-note"><span className="campus-note-icon"><GraduationCap size={19} /></span><strong>Made for campus life.</strong><p>Good things happen when your campus comes together.</p><span>Discover. Connect. Deliver.<ArrowUpRight size={14} /></span></div>
@@ -33,15 +31,15 @@ export function WorkspaceShell({ user, section, onSectionChange, connected, sync
         <div className="mobile-brand"><Brand /></div>
         <div className="topbar-actions">
           <span className={`connection-status ${!connected ? "is-offline" : ""}`} title={lastSynced ? `Last synced ${lastSynced.toLocaleTimeString("en-PH")}. Updates every two seconds.` : "Connecting to campus services"}>{connected ? <Wifi size={14} /> : <WifiOff size={14} />}<span>{!connected ? "Reconnecting" : syncing ? "Saving…" : lastSynced ? "Live updates" : "Connecting"}</span></span>
-          <button type="button" className="icon-button" aria-label="Refresh workspace" title="Refresh workspace" disabled={syncing} onClick={onRefresh}><RefreshCw size={17} className={syncing ? "is-spinning" : undefined} /></button>
-          <span className="topbar-divider" /><span className="user-avatar small" title={user.name}>{initials}</span>
-          <button type="button" className="icon-button mobile-logout" aria-label="Sign out" disabled={signingOut} onClick={onLogout}><LogOut size={17} /></button>
+          <button type="button" className="icon-button header-action" aria-label="Refresh workspace" title="Refresh workspace" disabled={syncing} onClick={onRefresh}><RefreshCw size={17} className={syncing ? "is-spinning" : undefined} /><span className="action-label">Refresh</span></button>
+          <span className="topbar-divider" />{user.role === "customer" ? <button type="button" className="user-avatar small" aria-label="Open your profile" onClick={() => onSectionChange("profile")}>{initials}</button> : <span className="user-avatar small" title={user.name}>{initials}</span>}
+          <button type="button" className="icon-button header-action mobile-logout" aria-label="Sign out" disabled={signingOut} onClick={onLogout}><LogOut size={17} /><span className="action-label">Sign out</span></button>
         </div>
       </header>
       <div className="workspace-content">
-        <header className="page-heading"><div><span className="eyebrow">{config.label}</span><h1 id="workspace-title" tabIndex={-1}>{current.title}</h1><p>{current.description}</p></div><span className="page-date">{new Date().toLocaleDateString("en-PH", { month: "short", day: "numeric", year: "numeric" })}</span></header>
+        <header className="page-heading"><div>{user.role !== "customer" && <span className="eyebrow">{config.label}</span>}<h1 id="workspace-title" tabIndex={-1}>{current.title}</h1>{current.description && <p>{current.description}</p>}</div>{user.role !== "customer" && <span className="page-date">{new Date().toLocaleDateString("en-PH", { month: "short", day: "numeric", year: "numeric" })}</span>}</header>
         {children}
-        <footer className="workspace-footer"><span>UniServe<span aria-hidden="true"> · </span>Your campus, connected.</span><span>Built around your everyday.</span></footer>
+        {user.role !== "customer" && <footer className="workspace-footer"><span>UniServe<span aria-hidden="true"> · </span>Your campus, connected.</span><span>Built around your everyday.</span></footer>}
       </div>
     </main>
   </div>;

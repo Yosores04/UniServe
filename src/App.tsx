@@ -1,3 +1,4 @@
+import { Brand } from "./components/Brand";
 import { useEffect, useState, type ElementType } from "react";
 import { ArrowDownLeft, CheckCheck, CircleDollarSign, Package, ShieldCheck, ShoppingBag, Sparkles, Star, Store, TrendingUp, Users } from "lucide-react";
 import { money } from "./components/DemoKit";
@@ -10,6 +11,7 @@ import { rolePath } from "./app/router";
 import { useWorkspace, type Workspace } from "./lib/workspace";
 import { resolveWorkspaceSection } from "./lib/workspaceNavigation";
 import { Marketplace } from "./portals/live/Marketplace";
+import { CustomerProfile } from "./portals/live/CustomerProfile";
 import { SellerWorkspace } from "./portals/live/SellerWorkspace";
 import { RiderWorkspace } from "./portals/live/RiderWorkspace";
 import { AdminWorkspace } from "./portals/live/AdminWorkspace";
@@ -59,6 +61,7 @@ function Dashboard({ user, onSignedOut }: { user: AuthUser; onSignedOut: () => v
     setSection(resolved);
     window.history.pushState({}, "", `${rolePath(user.role)}#${resolved}`);
     window.scrollTo({ top: 0, behavior: "auto" });
+    document.querySelector(".workspace-main")?.scrollTo({ top: 0 });
     requestAnimationFrame(() => {
       if (!document.querySelector('[aria-modal="true"]')) document.getElementById("workspace-title")?.focus({ preventScroll: true });
     });
@@ -71,13 +74,17 @@ function Dashboard({ user, onSignedOut }: { user: AuthUser; onSignedOut: () => v
     finally { setSigningOut(false); }
   }
   const shared = { data: live.data!, mutate: live.mutate, section, onSectionChange: navigate, busy: live.busy, actionError: live.actionError };
-  return <WorkspaceShell user={user} section={section} onSectionChange={navigate} connected={!live.connectionError} syncing={live.busy} lastSynced={live.lastSynced} onRefresh={() => void live.refresh()} onLogout={() => void logout()} signingOut={signingOut}>
+  const displayUser = live.data?.profile ? { ...user, name: live.data.profile.name } : user;
+  return <WorkspaceShell user={displayUser} section={section} onSectionChange={navigate} connected={!live.connectionError} syncing={live.busy} lastSynced={live.lastSynced} onRefresh={() => void live.refresh()} onLogout={() => void logout()} signingOut={signingOut}>
     {(live.connectionError || live.actionError || logoutError) && <p role="alert" className="live-warning">{live.actionError || live.connectionError || logoutError}</p>}
     {!live.data && <div className="workspace-loading" role="status"><span className="loading-orbit" /><h2>{live.connectionError ? "Let’s get you reconnected." : "Getting your workspace ready."}</h2><p>{live.connectionError ? "Keep the laptop and API running. We’ll try again shortly." : "Your campus is just a moment away."}</p></div>}
     {live.data && <>
-      <Metrics user={user} data={live.data} />
+      {user.role !== "customer" && <Metrics user={user} data={live.data} />}
       <fieldset className="live-workspace" disabled={live.busy || Boolean(live.connectionError)} aria-busy={live.busy}>
-        {user.role === "customer" && <Marketplace {...shared} />}
+        {user.role === "customer" && <>
+          <div hidden={section === "profile"}><Marketplace {...shared} /></div>
+          {section === "profile" && <CustomerProfile {...shared} user={displayUser} />}
+        </>}
         {user.role === "store" && <SellerWorkspace {...shared} />}
         {user.role === "courier" && <RiderWorkspace {...shared} />}
         {user.role === "admin" && <AdminWorkspace {...shared} />}
@@ -105,7 +112,7 @@ function App() {
     });
     return () => { mounted = false; };
   }, [attempt]);
-  if (user === undefined) return <main className="auth-shell"><section className="auth-card"><span className="auth-kicker">UniServe</span><h1>Your campus, connected.</h1><p role="status">{loadingError || "Getting things ready…"}</p>{loadingError && <button className="primary-button" onClick={() => setAttempt(attempt + 1)}>Try again</button>}</section></main>;
+  if (user === undefined) return <main className="auth-shell"><section className="auth-card"><Brand /><h1>Your campus, connected.</h1><p role="status">{loadingError || "Getting things ready…"}</p>{loadingError && <button className="primary-button" onClick={() => setAttempt(attempt + 1)}>Try again</button>}</section></main>;
   if (!user) return <AuthScreen onAuthenticated={(next) => { window.history.replaceState({}, "", `${rolePath(next.role)}#${resolveWorkspaceSection(next.role, "")}`); setUser(next); }} />;
   return <Dashboard key={user.id} user={user} onSignedOut={() => { setUser(null); window.history.replaceState({}, "", "/"); }} />;
 }

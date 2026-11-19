@@ -3,6 +3,7 @@ import { ArrowUpRight, MapPin, MessageCircle, Package, Send, Star } from "lucide
 import type { LiveOrder, Mutate } from "../../lib/workspace";
 import type { Role } from "../../types";
 import { money } from "../../components/DemoKit";
+import { CustomerTracking, CourierSharing } from "./DeliveryTracking";
 
 export function statusLabel(value: string) {
   return value.toLowerCase().split("_").join(" ").replace(/^./, (letter) => letter.toUpperCase());
@@ -31,6 +32,8 @@ export function OrderDetails({ order, role, mutate, onReorder }: {
     <ul className="live-items">{order.items.map((item) => <li key={item.id}>{item.quantity} × {item.name}<span>{money(item.quantity * item.unitPrice)}</span></li>)}</ul>
     <div className="order-meta"><span>{money(order.deliveryFee)} delivery</span><span>{order.paymentMethod === "COD" ? "Cash on delivery" : "E-wallet · arranged separately"}</span><span>{new Date(order.createdAt).toLocaleDateString("en-PH", { month: "short", day: "numeric" })}</span></div>
     {order.customerNote && <p className="live-note">{order.customerNote}</p>}
+    {role === "customer" && <CustomerTracking order={order} />}
+    {role === "courier" && order.riderId && nextDelivery && <CourierSharing key={order.id} orderId={order.id} />}
     <div className="row-actions">
       {role === "customer" && onReorder && <button type="button" className="secondary-button" onClick={() => onReorder(order)}>Order again<ArrowUpRight size={13} /></button>}
       {role === "customer" && order.status === "PENDING" && <button type="button" className="chip-button" onClick={() => void mutate(`/api/customer/orders/${order.id}/cancel`)}>Cancel order</button>}

@@ -4,6 +4,8 @@ import { EmptyState, Panel, PanelHeader, money } from "../../components/DemoKit"
 import { Modal } from "../../components/workspace/Modal";
 import type { Mutate, Product, Shop, Workspace } from "../../lib/workspace";
 import { OrderDetails, statusLabel } from "./OrderDetails";
+import { mapPoint } from "../../lib/workspace";
+import { PinPicker } from "../../components/maps/CampusMap";
 
 type Props = { data: Workspace; mutate: Mutate; section: string; onSectionChange: (section: string) => void; busy?: boolean; actionError?: string };
 
@@ -12,19 +14,20 @@ function ShopForm({ shop, mutate, busy }: { shop?: Shop; mutate: Mutate; busy: b
   const [category, setCategory] = useState(shop?.category ?? "Student entrepreneur");
   const [location, setLocation] = useState(shop?.location ?? "Business Building");
   const [hours, setHours] = useState(shop?.operatingHours ?? "9:00 AM - 4:00 PM");
+  const [pin, setPin] = useState(() => mapPoint(shop?.latitude, shop?.longitude));
   const [notice, setNotice] = useState("");
   return <form onSubmit={async (event) => {
     event.preventDefault(); setNotice("");
-    const body = shop ? { name: name.trim(), operatingHours: hours.trim() } : { name: name.trim(), category: category.trim(), location: location.trim(), operatingHours: hours.trim() };
+    const body = { name: name.trim(), location: location.trim(), operatingHours: hours.trim(), pin, ...(!shop && { category: category.trim() }) };
     setNotice(await mutate("/api/shop/profile", body, shop ? "PATCH" : "POST") ? "Shop details saved." : "Unable to save. Your changes are still here; please try again.");
   }}>
     <div className="form-grid">
       <label>Shop name<input required minLength={2} maxLength={100} value={name} onChange={(event) => setName(event.target.value)} /></label>
       {!shop && <label>Category<input required minLength={2} maxLength={80} value={category} onChange={(event) => setCategory(event.target.value)} /></label>}
-      {!shop && <label>Pickup location<input required minLength={2} maxLength={120} value={location} onChange={(event) => setLocation(event.target.value)} /></label>}
+      <label>Pickup location<input required minLength={2} maxLength={120} value={location} onChange={(event) => setLocation(event.target.value)} /></label>
       <label>Operating hours<input required minLength={3} maxLength={120} value={hours} onChange={(event) => setHours(event.target.value)} /></label>
     </div>
-    <p className="section-description">{shop ? `${shop.category} · Pickup at ${shop.location}. ` : ""}Hours are shown to customers.</p>
+    <PinPicker label="Stall pickup pin" value={pin} onChange={setPin} />
     <div className="form-actions"><button className="primary-button" disabled={busy}>{shop ? "Save shop details" : "Create my shop"}</button></div>
     {notice && <p role="status">{notice}</p>}
   </form>;

@@ -1,5 +1,6 @@
 import { useRef, useState, type FormEvent } from "react";
-import { GraduationCap, LockKeyhole } from "lucide-react";
+import { LockKeyhole } from "lucide-react";
+import { Brand } from "./Brand";
 import type { AuthUser } from "../lib/auth";
 import { loginWithApi, registerWithApi } from "../lib/authClient";
 import type { Role } from "../types";
@@ -50,10 +51,7 @@ export function AuthScreen({
   return (
     <main className="auth-shell">
       <section className="auth-card">
-        <div className="auth-mark" aria-hidden="true">
-          <GraduationCap size={26} strokeWidth={1.6} />
-        </div>
-        <p className="auth-kicker">UniServe</p>
+        <Brand />
         <h1>{mode === "login" ? "Welcome back" : "Create your account"}</h1>
         <p className="auth-intro">
           {mode === "login"

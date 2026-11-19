@@ -7,7 +7,7 @@ import { shopRouter } from "./modules/shop/shop.routes.js";
 import { adminRouter } from "./modules/admin/admin.routes.js";
 import { workspaceRouter } from "./modules/workspace.routes.js";
 
-export function createApp() {
+export function createApp(webRoot?: string) {
   const app = express();
 
   app.use(express.json());
@@ -23,6 +23,17 @@ export function createApp() {
   app.get("/api/health", (_request, response) => {
     response.json({ status: "ok", service: "uniserve-api" });
   });
+
+  app.use("/api", (_request, response) => {
+    response.status(404).json({ error: "NOT_FOUND", message: "API route not found." });
+  });
+
+  if (webRoot) {
+    app.use(express.static(webRoot));
+    app.get(["/admin", "/customer", "/rider", "/shop"], (_request, response) => {
+      response.sendFile("index.html", { root: webRoot });
+    });
+  }
 
   app.use((error: unknown, _request: express.Request, response: express.Response, _next: express.NextFunction) => {
     if (error instanceof Error && error.name === "ZodError") {

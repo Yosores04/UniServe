@@ -1,0 +1,109 @@
+apply plugin: 'com.android.application'
+
+def credentialFile = rootProject.file('keystore.properties')
+def credentials = new Properties()
+if (credentialFile.isFile()) {
+    credentialFile.withInputStream { credentials.load(it) }
+}
+def signingFields = ['STORE_FILE', 'STORE_PASSWORD', 'KEY_ALIAS', 'KEY_PASSWORD']
+def signingValues = signingFields.collectEntries { field ->
+    def name = "UNISERVE_${field}".toString()
+    [(field): System.getenv(name) ?: credentials.getProperty(name)]
+}
+def missingSigningFields = signingFields.findAll { !signingValues[it] }
+def releaseKeystore = signingValues.STORE_FILE ? rootProject.file(signingValues.STORE_FILE) : null
+
+android {
+    namespace "ph.edu.buksu.uniserve.dev"
+    compileSdk rootProject.ext.compileSdkVersion
+    defaultConfig {
+        applicationId "ph.edu.buksu.uniserve"
+        minSdkVersion rootProject.ext.minSdkVersion
+        targetSdkVersion rootProject.ext.targetSdkVersion
+        versionCode 1
+        versionName "0.1.0"
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        aaptOptions {
+             // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.
+             // Default: https://android.googlesource.com/platform/frameworks/base/+/282e181b58cf72b6ca770dc7ca5f91f135444502/tools/aapt/AaptAssets.cpp#61
+            ignoreAssetsPattern '!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~'
+        }
+    }
+    signingConfigs {
+        release {
+            if (missingSigningFields.empty) {
+                storeFile releaseKeystore
+                storePassword signingValues.STORE_PASSWORD
+                keyAlias signingValues.KEY_ALIAS
+                keyPassword signingValues.KEY_PASSWORD
+            }
+        }
+    }
+    buildTypes {
+        debug {
+            applicationIdSuffix ".dev"
+        }
+        release {
+            signingConfig signingConfigs.release
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+}
+
+repositories {
+    flatDir{
+        dirs '../capacitor-cordova-android-plugins/src/main/libs', 'libs'
+    }
+}
+
+dependencies {
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
+    implementation "androidx.appcompat:appcompat:$androidxAppCompatVersion"
+    implementation "androidx.coordinatorlayout:coordinatorlayout:$androidxCoordinatorLayoutVersion"
+    implementation "androidx.core:core-splashscreen:$coreSplashScreenVersion"
+    implementation project(':capacitor-android')
+    testImplementation "junit:junit:$junitVersion"
+    androidTestImplementation "androidx.test.ext:junit:$androidxJunitVersion"
+    androidTestImplementation "androidx.test.espresso:espresso-core:$androidxEspressoCoreVersion"
+    implementation project(':capacitor-cordova-android-plugins')
+}
+
+apply from: 'capacitor.build.gradle'
+
+def verifyReleaseSigningSettings = tasks.register('verifyReleaseSigningSettings') {
+    doLast {
+        if (!missingSigningFields.empty) {
+            def names = missingSigningFields.collect { "UNISERVE_${it}" }.join(', ')
+            throw new GradleException("Release signing requires ${names}. Set them in the environment or android/keystore.properties.")
+        }
+        if (!releaseKeystore.isFile()) {
+            throw new GradleException('UNISERVE_STORE_FILE must point to your release keystore.')
+        }
+    }
+}
+tasks.matching { it.name == 'preReleaseBuild' }.configureEach {
+    dependsOn verifyReleaseSigningSettings
+}
+
+def verifyReleaseWebAssets = tasks.register('verifyReleaseWebAssets') {
+    doLast {
+        def marker = file('src/main/assets/public/android-build.json')
+        def metadata = marker.exists() ? new groovy.json.JsonSlurper().parse(marker) : null
+        if (metadata?.variant != 'release' || !metadata.origin?.startsWith('https://')) {
+            throw new GradleException('Release requires HTTPS web assets. Run npm run android:release with VITE_MOBILE_API_ORIGIN set.')
+        }
+    }
+}
+tasks.matching { it.name == 'mergeReleaseAssets' }.configureEach {
+    dependsOn verifyReleaseWebAssets
+}
+
+try {
+    def servicesJSON = file('google-services.json')
+    if (servicesJSON.text) {
+        apply plugin: 'com.google.gms.google-services'
+    }
+} catch(Exception e) {
+    logger.info("google-services.json not found, google-services plugin not applied. Push Notifications won't work")
+}

@@ -1,0 +1,64 @@
+.campus-map {
+  position: relative;
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: #eef2f5;
+}
+.campus-map-canvas { width: 100%; height: clamp(220px, 40vh, 440px); }
+.campus-map-canvas .maplibregl-ctrl-group button { width: 44px; height: 44px; }
+.campus-map-canvas .maplibregl-ctrl-attrib { max-width: 100%; white-space: normal; }
+.campus-map-loading {
+  position: absolute;
+  inset: 1rem auto auto 1rem;
+  padding: .35rem .6rem;
+  border-radius: 6px;
+  background: white;
+  pointer-events: none;
+}
+.campus-map-fallback { display: grid; justify-items: center; gap: .5rem; padding: 1.5rem; text-align: center; }
+.campus-map-fallback p, .campus-map-fallback ul { margin: 0; }
+.campus-map-fallback ul { display: grid; gap: .5rem; list-style: none; padding: 0; }
+.campus-map-marker { width: 44px; height: 44px; border: 0; border-radius: 50%; background: transparent; padding: 0; }
+.campus-map-marker::before {
+  content: "";
+  position: absolute;
+  left: 10px;
+  bottom: 5px;
+  width: 24px;
+  height: 24px;
+  border: 2px solid white;
+  border-radius: 50% 50% 50% 0;
+  background: var(--royal);
+  box-shadow: 0 2px 5px #142c4a66;
+  transform: rotate(-45deg);
+}
+.campus-map-marker::after { content: ""; position: absolute; bottom: 15px; left: 20px; width: 8px; height: 8px; border-radius: 50%; background: white; }
+.campus-map [data-tracking-pin="pickup"] { --pin-color: #116244; }
+.campus-map [data-tracking-pin="dropoff"] { --pin-color: #8b4218; }
+.campus-map [data-tracking-pin="courier"] { --pin-color: #274ab6; }
+.campus-map-marker[data-tracking-pin]::before { background: var(--pin-color); }
+.campus-map-marker[data-tracking-pin]::after {
+  content: attr(data-symbol);
+  display: grid;
+  place-items: center;
+  left: 10px;
+  bottom: 5px;
+  width: 28px;
+  height: 28px;
+  color: white;
+  background: transparent;
+  font: bold 14px/1 system-ui, sans-serif;
+}
+.campus-tracking-legend { display: flex; flex-wrap: wrap; gap: .2rem .65rem; list-style: none; margin: 0; padding: .2rem .55rem; background: white; }
+.campus-tracking-legend li { max-width: 100%; }
+.campus-tracking-legend button { display: flex; align-items: center; gap: .4rem; min-height: 44px; text-align: left; border: 0; background: transparent; color: var(--ink); font-size: .8rem; overflow-wrap: anywhere; }
+.campus-tracking-legend span { flex: none; display: grid; place-items: center; width: 1.4rem; height: 1.4rem; border-radius: 50%; background: var(--pin-color); color: white; font-weight: bold; }
+.campus-pin-picker { min-width: 0; grid-column: 1 / -1; }
+.campus-pin-heading, .campus-coordinates { display: flex; align-items: center; gap: .75rem; }
+.campus-pin-heading { justify-content: space-between; }
+.campus-pin-heading small { display: block; color: var(--muted); }
+.campus-pin-picker p { margin: .75rem 0 .5rem; }
+.campus-coordinates { margin: .75rem 0; }
+.campus-coordinates label { min-width: 0; flex: 1; }

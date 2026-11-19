@@ -15,6 +15,62 @@ async function register(role: string) {
   return agent;
 }
 describe("Shared marketplace", () => {
+  it("saves customer contact details for the signed-in account", async () => {
+    const buyer = await register("CUSTOMER");
+    const user = (await buyer.get("/api/auth/me")).body.user;
+    expect((await buyer.get("/api/workspace")).body.profile).toEqual({ name: user.name, email: user.email, phone: null });
+    await prisma.customerProfile.delete({ where: { userId: user.id } });
+    const profile = { name: "Alex Cruz", email: user.email, phone: "+63 917 555 1234" };
+    expect((await buyer.patch("/api/customer/profile").send({ name: " A ", phone: "123" })).status).toBe(400);
+    const edit = await buyer.patch("/api/customer/profile").send({ name: " Alex Cruz ", phone: profile.phone, email: "other@test.local" });
+    expect(edit.status).toBe(200);
+    expect(edit.body.profile).toEqual(profile);
+    expect((await buyer.get("/api/workspace")).body.profile).toEqual(profile);
+    expect((await buyer.get("/api/auth/me")).body.user).toMatchObject({ name: profile.name, role: "CUSTOMER" });
+  });
+  it("keeps purchases separate from shop orders while a customer applies and sells", async () => {
+    const seller = await register("CUSTOMER");
+    const buyer = await register("CUSTOMER");
+    const admin = await login("admin@uniserve.local", "Admin123!");
+    const initial = (await seller.get("/api/workspace")).body;
+    expect(initial).toMatchObject({ ownedShop: null, sellerOrders: [] });
+    const catalog = initial.shops.find((shop: { name: string }) => shop.name === "Campus Print Hub");
+    const orderInput = { shopId: catalog.id, serviceType: "Marketplace", pickupPoint: catalog.location, dropoffPoint: "Gym", paymentMethod: "COD", items: [{ shopItemId: catalog.items[0].id, quantity: 1 }] };
+    const purchase = await seller.post("/api/customer/orders").send(orderInput).expect(201);
+    const application = { name: "Design Studio", location: "Hall", operatingHours: "9 to 4", category: "Crafts", product: { name: "Sketchpad", price: 25 } };
+    await seller.post("/api/shop/profile").send(application).expect(403);
+    await seller.post("/api/shop/applications").send({ ...application, product: { ...application.product, price: -1 } }).expect(400);
+    expect((await seller.get("/api/workspace")).body.ownedShop).toBeNull();
+    const attempts = await Promise.all([1, 2].map(() => seller.post("/api/shop/applications").send(application)));
+    expect(attempts.map(result => result.status).sort()).toEqual([201, 409]);
+    const shop = attempts.find(result => result.status === 201)!.body.shop;
+    expect(shop).toMatchObject({ verification: "PENDING", items: [application.product] });
+    const offered = { ...orderInput, shopId: shop.id, items: [{ shopItemId: shop.items[0].id, quantity: 1 }] };
+    expect((await seller.get("/api/workspace")).body.ownedShop.id).toBe(shop.id);
+    expect((await buyer.get("/api/workspace")).body.shops).not.toContainEqual(expect.objectContaining({ id: shop.id }));
+    await buyer.post("/api/customer/orders").send(offered).expect(404);
+    await admin.patch(`/api/admin/shops/${shop.id}/verification`).send({ verification: "REJECTED" }).expect(200);
+    const revised = { ...application, name: "Campus Design Studio", product: { name: "Sketchbook", price: 30 } };
+    const resubmissions = await Promise.all([1, 2].map(() => seller.post("/api/shop/applications").send(revised)));
+    expect(resubmissions.map(result => result.status).sort()).toEqual([200, 409]);
+    expect(resubmissions.find(result => result.status === 200)!.body.shop).toMatchObject({ id: shop.id, verification: "PENDING", items: [{ id: shop.items[0].id, ...revised.product }] });
+    await admin.patch(`/api/admin/shops/${shop.id}/verification`).send({ verification: "VERIFIED" }).expect(200);
+    await seller.post("/api/shop/applications").send(revised).expect(409);
+    await seller.patch("/api/shop/profile").send({ operatingHours: "8 to 6" }).expect(200);
+    await seller.post("/api/shop/items").send({ name: "Canvas", price: 50 }).expect(201);
+    const publicShop = (await buyer.get("/api/customer/shops")).body.shops.find((record: { id: string }) => record.id === shop.id);
+    expect(publicShop).toMatchObject({ operatingHours: "8 to 6", verification: "VERIFIED" });
+    expect(publicShop.items).toHaveLength(2);
+    const sale = await buyer.post("/api/customer/orders").send(offered).expect(201);
+    await buyer.patch(`/api/shop/items/${shop.items[0].id}`).send({ price: 1 }).expect(404);
+    await buyer.patch(`/api/shop/orders/${sale.body.order.id}/status`).send({ status: "PREPARING" }).expect(409);
+    await seller.patch(`/api/shop/orders/${sale.body.order.id}/status`).send({ status: "PREPARING" }).expect(200);
+    const snapshot = (await seller.get("/api/workspace")).body;
+    expect(snapshot.orders.map((order: { id: string }) => order.id)).toEqual([purchase.body.order.id]);
+    expect(snapshot.sellerOrders.map((order: { id: string }) => order.id)).toEqual([sale.body.order.id]);
+    expect((await buyer.get("/api/workspace")).body.sellerOrders).toEqual([]);
+    expect((await seller.get("/api/auth/me")).body.user.role).toBe("CUSTOMER");
+  });
   it("isolates logout to the requesting phone", async () => {
     const first = await login("customer@uniserve.local", "Customer123!");
     const second = await login("customer@uniserve.local", "Customer123!");

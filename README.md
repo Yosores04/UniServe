@@ -2,6 +2,35 @@
 
 UniServe is a campus services platform for requesting food deliveries, printing services, errands, and marketplace orders. The application provides dedicated workspaces for customers, couriers, campus entrepreneurs, and administrators.
 
+## Cloud pilot and public downloads
+
+Deploy the web admin and API together with the [Render pilot setup](docs/cloud-pilot.md). Administrators open `/admin` on that service's HTTPS origin. The Android release connects to the same service. Keep demo accounts and local SQLite data on the development laptop.
+
+After the hosted service is tested, follow the [Android release guide](docs/android-public-release.md) and attach the signed `UniServe.apk` to a stable GitHub Release. To launch the landing page, merge the reviewed Pages workflow into the default branch, enable **Settings → Pages → GitHub Actions**, and run **Publish UniServe landing page** from Actions. It deploys only the `landing/` directory. The QR opens the stable project Pages URL so existing posters continue working after APK updates. Check the QR and installation on an Android phone before distributing it.
+
+## Test the Android app on Windows
+
+### Stall maps and delivery tracking
+
+In **Browse**, choose **Map** to see shops with a saved pickup pin. Search and service filters apply to both the list and the map. Tap a pin to see the shop and open its products. Sellers can set a stall pin in their application or under **Shop settings**. Customers can add a drop-off pin beside their written checkout instructions. Existing orders and shops that only have text addresses still work.
+
+On an assigned delivery, the courier can tap **Share my location** and grant location permission. Keep the app in the foreground. The customer opens **My orders → Track delivery** for the pickup, drop-off and last shared location. Ending sharing or completing delivery clears the live position. A connection interruption can leave a last-known point with its timestamp.
+
+For home testing, run `npm.cmd run demo:setup` to apply migrations and seed local accounts, then start the local API. With the seeded customer signed into the emulator, run `node scripts/map-pilot.mjs`. This local simulation creates a labeled test stall and test order and sends synthetic courier positions. The test coordinates are examples near campus. Sellers should place their own pins before a campus pilot.
+
+The basemap loads from OpenFreeMap over HTTPS. An alternative MapLibre style can be supplied through `VITE_MAP_STYLE_URL` at build time. Pin lists and coordinate entry remain available if the basemap fails.
+
+### Run the local APK
+
+The local Android pilot bundles the interface in an APK. The Pixel emulator connects to the laptop's Express API at `http://10.0.2.2:3001`. Keep the API running while testing. A physical phone needs its own reachable API address.
+
+1. From the repository root, run `npm.cmd ci`, `npx.cmd prisma generate`, and `npm.cmd run demo:setup`. Start the backend with `npm.cmd run server:dev`. To test other roles in laptop browsers as well, use `npm.cmd run demo` in place of the backend-only command.
+2. In a second PowerShell terminal, run `npm.cmd run android:debug` from the repository root. Rerun this command after changes to update the bundled app. The pilot uses Capacitor 7.6.10, Node 20.17.0, Android Studio JBR 21.0.3, Gradle 8.11.1 and Android SDK 35. In Android Studio, open **Device Manager** and start **Pixel_6_API_35**.
+3. Install the debug APK by dragging `android/app/build/outputs/apk/debug/app-debug.apk` onto the running emulator. Open **UniServe** in the app drawer. Use a seeded account from the demo accounts table below.
+4. For a session check, sign in, force-stop UniServe from Android Settings, then reopen it. The same account should return. Sign out and reopen again to check that the session has ended.
+
+If the emulator crashes on startup with `EGL_BAD_CONFIG`, set the virtual device's graphics to **Software** and choose **Cold Boot Now** in Device Manager. This configuration worked on the development laptop.
+
 ## Overview
 
 The application includes the following user areas:
