@@ -13,6 +13,7 @@
 ### Task 1: Add backend dependencies and workspace scripts
 
 **Files:**
+
 - Modify: `package.json`
 - Modify: `vite.config.ts`
 - Create: `server/tsconfig.json`
@@ -32,6 +33,7 @@
 ### Task 2: Create Prisma schema and seed data
 
 **Files:**
+
 - Create: `prisma/schema.prisma`
 - Create: `prisma/seed.ts`
 - Create: `.env.example`
@@ -51,6 +53,7 @@
 ### Task 3: Implement authentication and RBAC middleware
 
 **Files:**
+
 - Create: `server/src/modules/auth/auth.service.ts`
 - Create: `server/src/modules/auth/auth.routes.ts`
 - Create: `server/src/middleware/authenticate.ts`
@@ -70,6 +73,7 @@
 ### Task 4: Implement customer and rider APIs
 
 **Files:**
+
 - Create: `server/src/modules/customer/customer.routes.ts`
 - Create: `server/src/modules/customer/customer.service.ts`
 - Create: `server/src/modules/rider/rider.routes.ts`
@@ -89,6 +93,7 @@
 ### Task 5: Implement shop and admin APIs
 
 **Files:**
+
 - Create: `server/src/modules/shop/shop.routes.ts`
 - Create: `server/src/modules/shop/shop.service.ts`
 - Create: `server/src/modules/admin/admin.routes.ts`
@@ -109,6 +114,7 @@
 ### Task 6: Add frontend API client and authenticated route shell
 
 **Files:**
+
 - Create: `src/lib/apiClient.ts`
 - Create: `src/lib/authClient.ts`
 - Create: `src/app/router.tsx`
@@ -130,6 +136,7 @@
 ### Task 7: Migrate separate role interfaces
 
 **Files:**
+
 - Create: `src/features/customer/CustomerRoutes.tsx`
 - Create: `src/features/rider/RiderRoutes.tsx`
 - Create: `src/features/shop/ShopRoutes.tsx`
@@ -150,6 +157,7 @@
 ### Task 8: Integrate local development and document handoff
 
 **Files:**
+
 - Modify: `package.json`
 - Modify: `README.md`
 - Modify: `.env.example`
