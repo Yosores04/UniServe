@@ -1,0 +1,16 @@
+:root { font: 16px/1.5 system-ui, sans-serif; color: #103657; background: #f6f6ef; }
+* { box-sizing: border-box; }
+body { margin: auto; max-width: 75rem; padding: 0 clamp(1.25rem,5vw,5rem); }
+header { height: 6rem; display: flex; align-items: center; gap: .65rem; border-bottom: 1px solid #cbd4cd; }
+main { display: grid; grid-template-columns: minmax(0,1.45fr) minmax(16rem,.8fr); align-items: center; gap: clamp(2rem,6vw,6rem); padding: clamp(3rem,10vh,8rem) 0; }
+.campus { font-weight: 650; margin: 0 0 1.2rem; }
+h1 { font-size: clamp(3.25rem,7vw,6.7rem); line-height: .99; letter-spacing: -.065em; margin: 0 0 1.6rem; }
+.intro { max-width: 33rem; font-size: 1.17rem; color: #39546b; }
+.release { margin-top: 2rem; border-left: .3rem solid #eeb325; padding-left: 1rem; }
+.button { display: inline-block; background: #103b68; color: white; font-weight: 650; border-radius: .6rem; padding: .8rem 1.25rem; }
+[hidden] { display: none; }
+aside { text-align: center; background: #103b68; color: white; border-radius: 1.6rem; padding: 2rem 1.5rem; }
+aside img { display: block; max-width: 100%; height: auto; margin: auto; background: white; }
+h2 { font-size: 1.4rem; margin: 1.25rem 0 .4rem; }
+aside p { max-width: 18rem; margin: auto; color: #e2eaf1; }
+@media (max-width: 700px) { main { grid-template-columns: 1fr; } header { height: 4.5rem; } }
